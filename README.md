@@ -49,7 +49,7 @@ The LLM never answers without retrieved context. All responses are conditioned o
 ### Chunking Strategy
 
 ```python
-CHUNK_SIZE = 1200       # words
+CHUNK_SIZE = 600       # words
 CHUNK_OVERLAP = 200     # words
 ```
 

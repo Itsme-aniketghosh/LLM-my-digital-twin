@@ -178,7 +178,7 @@ def main():
     print("="*60)
     
     # Configuration - adjust these for optimization!
-    CHUNK_SIZE = 1200      # Words per chunk (try 300-600)
+    CHUNK_SIZE = 600      # Words per chunk (try 300-600)
     CHUNK_OVERLAP = 200  # Overlapping words (try 50-150)
     
     # Create processor with custom settings
