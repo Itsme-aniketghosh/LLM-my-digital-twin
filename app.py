@@ -1,544 +1,448 @@
 """
-Portfolio Digital Twin - AI Assistant
-Trained on personal statements, resume, and experience
-Powered by Llama 3.1 via Hugging Face API
+Aniket Ghosh — Digital Twin
+An AI that answers as Aniket: background, projects, AI-safety direction, and fit.
+Knowledge lives in editable markdown under knowledge/ and is embedded at startup.
+Powered by Llama 3.3 70B via the Hugging Face Inference API (with fallbacks).
 """
 
-import gradio as gr
-import pickle
-import faiss
-from sentence_transformers import SentenceTransformer
-from huggingface_hub import InferenceClient
 import os
+import glob
+import re
+import numpy as np
+import gradio as gr
+from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
 load_dotenv()
 
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
-hf_token = os.getenv("HF_TOKEN", None)
-client = InferenceClient(token=hf_token)
+# ── Inference setup ───────────────────────────────────────────────────────
+# Primary: FREE OpenRouter models (no credits used). Fallback: Llama-3.1-8B on HF.
+# The chain tries each model in order until one streams a real answer.
+openrouter_key = os.getenv("OPENROUTER_API_KEY")
+hf_token = os.getenv("HF_TOKEN")  # None locally → HF client uses cached login
 
-if hf_token:
-    print("✅ Using Hugging Face API token")
-else:
-    print("⚠️ No HF_TOKEN - Add to .env file")
-    print("Get token: https://huggingface.co/settings/tokens")
+# Free OpenRouter ids verified to respond cleanly & fast (best/fastest first).
+# gpt-oss-120b is primary (proved reliable + clean across all tabs); qwen3-next
+# is fast but currently rate-limited; the rest are progressively-degrading nets.
+OR_FREE_MODELS = [
+    "openai/gpt-oss-120b:free",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "google/gemma-4-31b-it:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "openrouter/free",
+]
+HF_FALLBACK = "meta-llama/Llama-3.1-8B-Instruct"
 
-MODEL_NAME = "meta-llama/Llama-3.1-8B-Instruct"
+# (provider, model) chain.
+MODEL_CHAIN = []
+_override = os.getenv("TWIN_MODEL")
+if _override:
+    MODEL_CHAIN.append(("openrouter" if openrouter_key else "hf", _override))
+if openrouter_key:
+    MODEL_CHAIN += [("openrouter", m) for m in OR_FREE_MODELS]
+MODEL_CHAIN.append(("hf", HF_FALLBACK))  # final safety net, on Hugging Face
+_seen = set()
+MODEL_CHAIN = [x for x in MODEL_CHAIN if not (x in _seen or _seen.add(x))]
 
-# ── Hardcoded resume context (always available to the twin) ──────────────
+# Clients (lazy-ish): OpenRouter only if keyed; HF always available for fallback.
+_or_client = None
+if openrouter_key:
+    from openai import OpenAI
+    _or_client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=openrouter_key)
+from huggingface_hub import InferenceClient
+_hf_client = InferenceClient(token=hf_token)
+
+PRIMARY_PROVIDER, PRIMARY_MODEL = MODEL_CHAIN[0]
+print(f"✅ Model chain ({len(MODEL_CHAIN)}): primary={PRIMARY_PROVIDER}:{PRIMARY_MODEL}, fallback=hf:{HF_FALLBACK}")
+
+
+def _stream_model(provider, model, messages, max_tokens, temperature):
+    """Yield content deltas from one (provider, model)."""
+    if provider == "openrouter":
+        if _or_client is None:
+            return
+        resp = _or_client.chat.completions.create(
+            model=model, messages=messages, max_tokens=max_tokens,
+            temperature=temperature, top_p=0.9, stream=True,
+        )
+        for chunk in resp:
+            if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+    else:
+        stream = _hf_client.chat_completion(
+            messages=messages, model=model, max_tokens=max_tokens,
+            temperature=temperature, top_p=0.9, stream=True,
+        )
+        for chunk in stream:
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+
+
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
+
+# ── Always-on authoritative context (source of truth) ─────────────────────
 RESUME_CONTEXT = """
-=== WHO I AM (use this for elevator pitches, introductions, and "tell me about yourself") ===
-I'm Aniket Ghosh — an AI/ML engineer and researcher currently pursuing my Master's in AI at Northeastern University in Boston with a 4.0 GPA. My core expertise is in deep learning, computer vision, NLP, and AI agent systems. I've built projects like a biomedical knowledge graph for drug-gene-disease discovery (0.94 ROC-AUC), a multi-agent autonomous trading system using OpenAI Agents SDK with 6 MCP servers and 44 tools, and a traffic sign detection system published at AISC 2024 (Springer). I've done research in medical image analysis at CMATER Lab (Jadavpur University), where I developed cell segmentation pipelines and mentored junior researchers. Currently I'm a Teaching Assistant for an NLP graduate course at Northeastern. What drives me beyond the technical side is a belief that AI and technology can be equalizers — I grew up seeing global disparities firsthand and have been involved in community education and philanthropy. I'm looking for roles where I can apply my AI/ML skills to meaningful problems while learning from experienced teams.
+=== WHO I AM (elevator pitch / "tell me about yourself") ===
+I'm Aniket Ghosh — an AI/ML engineer and researcher. I'm currently the SOLE ML engineer at Varosync, an early-stage drug-discovery startup in Boston, where I'm building a molecular-similarity search system over millions of molecules from scratch and reporting to the CEO/CTO. In parallel I'm finishing my M.S. in Artificial Intelligence (ML concentration) at Northeastern University with a 4.0 GPA. My focus is the hard technical core of AI: mechanistic interpretability, evaluations, and shipping ML systems that work. My ideal role is Research Engineer — and I'm drawn to AI safety / interpretability / evals teams. I want the toughest problems a team has.
 
-=== RESUME (SOURCE OF TRUTH — always trust this over personal statements/SOPs) ===
-NOTE: Some training data includes application essays written for UC Berkeley and other schools. Those reflect motivations and goals, NOT where I actually study. I am at NORTHEASTERN UNIVERSITY.
-
-=== EDUCATION ===
-- Master of Science in Artificial Intelligence (ML Concentration) at Northeastern University, Boston (Aug 2025 – May 2027). GPA: 4.0/4.0, 15% Merit Scholarship. Courses: Foundations of AI, Algorithms, Actionable Interpretable Methods, Applied Programming for AI.
-- Bachelor of Technology in CS & Business Systems at Institute of Engineering & Management, Kolkata, India (Jul 2020 – Jun 2024). GPA: 4.0/4.0, Ranked 2nd out of 180, Director's Award. Key Courses: Data Structures, Operating Systems, Database Management, Neural Networks, NLP.
-
-=== TECHNICAL SKILLS ===
-- Programming Languages: Python, C/C++, Java, JavaScript, SQL, HTML/CSS
-- LLM & Gen AI: RAG, ChromaDB, OpenRouter, OpenAI/Anthropic APIs, LoRA/QLoRA, Hugging Face
-- AI Agents & Orchestration: OpenAI Agents SDK, CrewAI, AutoGen, LangChain, LangGraph, MCP, Function Calling
-- ML Frameworks: PyTorch, TensorFlow, Keras, scikit-learn, YOLOv8, CNNs, Transformers, U-Net
-- MLOps & Cloud: AWS (Bedrock, SageMaker, Lambda, S3), Azure, GCP, Docker, Terraform, GitHub Actions, MLflow
-- Specializations: ML Engineering, AI Systems, Computer Vision, Medical Image Analysis, NLP, Explainable AI
+=== FACTUAL SOURCE OF TRUTH (trust this over any older essays/SOPs) ===
+- I attend NORTHEASTERN UNIVERSITY (M.S. in AI, Aug 2025–May 2027). Undergrad: Institute of Engineering & Management (IEM), Kolkata. NEVER say UC Berkeley or any other school.
+- I DO have real industry experience now: AI/ML Engineer at Varosync, Inc. (Boston) since May 2026 — sole ML engineer on a drug-discovery platform.
 
 === EXPERIENCE ===
-- Teaching Assistant – NLP (Graduate Course), Northeastern University (Aug 2025 – Present): Lead weekly lab sessions teaching 40+ students PyTorch fundamentals, ML/DL architectures, Word2Vec, and NER. Grade assignments on transformer architectures and attention mechanisms. 95% lab completion rate.
-- Researcher & Research Mentor, CMATER Lab, Jadavpur University (Mar 2024 – May 2025): Developed custom ML pipelines for cell segmentation in histopathological images achieving 85%+ accuracy. Implemented DBSCAN clustering for cell detection, reducing false positives by 30% vs baseline Mask R-CNN. Mentored 3 junior researchers, accelerating their timelines by 2 months.
-- Research Intern, North-Eastern Hill University (Feb 2023 – Jul 2023): Reviewed 50+ papers on sign language recognition; analyzed ASL, MNIST, and Static ISL datasets.
-- Industrial Trainee, Novotel Kolkata (Dec 2022 – Jan 2023): Facilitated IT migration to Oracle cloud for 1000+ rooms; reduced downtime by 40%.
+- AI/ML Engineer, Varosync, Inc. (Boston) — May 2026–Present. Sole ML engineer on an early-stage drug-discovery platform; built the stack from scratch, reporting to CEO/CTO. Architected a biomedical knowledge graph spanning millions of molecules; building a molecular-similarity search system — training molecular-similarity embedding models over millions of molecules and owning the full pipeline (gold-label curation → featurization → embedding training → evaluation → vector indexing → query layer) on hybrid cloud. Uses agentic coding tools (Claude Code, Cursor) daily.
+- AI Researcher, CMATER Lab, Jadavpur University — Jun 2023–May 2025. Unsupervised histopathology cell-segmentation pipeline (color quantization + DBSCAN), 85%+ accuracy, 30% fewer false positives vs Mask R-CNN. Mentored junior researchers.
+- CV Research Intern, North-Eastern Hill University (remote) — Feb–Jul 2023. 50+ paper review; defined standards for an Indian Sign Language benchmark.
 
 === PROJECTS ===
-- Biomedical Knowledge Graph Link Prediction (Healthcare AI): Built link prediction on BioRED corpus (3,783 entities, 8 relation types). Random Forest achieved 0.94 ROC-AUC, outperforming TransE/RotatE/ComplEx by 23%+ using engineered graph features (PageRank, Preferential Attachment). Implemented multi-hop reasoning (up to 5 hops) for explainable drug-gene-disease discovery via NetworkX.
-- Autonomous Multi-Agent Trading Simulation: Designed multi-agent trading system with 4 AI traders, 6 MCP servers, 44 tools using OpenAI Agents SDK. Integrated Polygon.io, Brave Search, and LibSQL for autonomous portfolio management ($10K each). Built real-time Gradio dashboard with P&L monitoring and custom tracing.
-- Intelligent Traffic Sign Detection System (Published at AISC 2024, Springer): Integrated YOLOv8 with custom CNN filtering layer. Trained on Berkeley, fine-tuned on IIIT Hyderabad dataset for Indian road conditions.
+- Sufficient Cause Disambiguation (SCD) — mechanistic interpretability, CS 7180 (PhD-level). On Llama-3-8B, PROVED probing accuracy and causal relevance are distinct (separator tokens: 1.000 LDA accuracy across all 32 layers, but 0% flip rate under causal patching). Built an LDA + gradient-attribution + causal-patching pipeline: 448× feature compression at 99.6% accuracy, 100% prediction-flip rate at α=2. Also audited an LLM resume-screener for demographic bias via counterfactual name-swaps: 95.8% prediction-flip rate on identical-content resumes, 62% of highest-uncertainty Fit decisions. (Flagship safety/evals project.)
+- Biomedical Knowledge Graph Link Prediction — engineered graph features (PageRank, structural metrics) on BioRED; Random Forest 0.94 ROC-AUC, +23% over learned embeddings; 5-hop explainable reasoning. Classical ML vs TransE benchmark (0.94 vs 0.61).
+- Autonomous Multi-Agent Trading Simulation — OpenAI Agents SDK; 4 AI traders, 6 MCP servers, 44 tools, live Polygon.io data.
+- Intelligent Traffic Sign Detection — YOLOv8 + hybrid CNN filtering; first-author paper, AISC 2024 (Springer).
+
+=== AI SAFETY DIRECTION ===
+- Selected for BlueDot Impact — Technical AI Safety (cohort, 2026). Working toward ARENA, Apart hackathons, SPAR, and research-engineer programs (MATS / Anthropic Fellows style), aiming at a full-time safety/evals/interpretability role by graduation (May 2027).
+- I care about the empirical, technical version of safety: mechanistic interpretability + evaluations. I've already shipped real results (SCD causal study; LLM bias audit).
+
+=== TEACHING & EDUCATION ===
+- Teaching Co-Lead, AIDE Program (Northeastern AI & Data Ethics Summer, Jun–Aug 2026): designed a 12-session applied ML curriculum for philosophy PhD students — fairness (COMPAS, FairLearn), differential privacy, transformer internals, LLM interpretability (LogitLens), RAG + knowledge graphs.
+- Graduate TA, NLP (Northeastern, Aug 2025–present): PyTorch/DL labs for 40+ grad students.
+- B.Tech: ranked 2nd of 180+, Director's Award.
+
+=== PUBLICATIONS & PATENTS ===
+- AISC 2024 (Springer), first author — traffic sign detection.
+- IEEE, co-author — Lightweight Hybrid DNN-GNN for Network Intrusion Detection; patent filed by SRM Institute.
+
+=== SKILLS ===
+PyTorch, Hugging Face, TensorFlow, scikit-learn, OpenCV. RAG, LangChain, LangGraph, CrewAI, OpenAI Agents SDK, MCP, ChromaDB, LoRA/QLoRA. Mechanistic interpretability, causal patching, gradient attribution, LDA probing, LogitLens, counterfactual/bias evals, FairLearn, differential privacy. Docker, Kubernetes, AWS, GCP, GitHub Actions, CI/CD, MLflow, FastAPI, Terraform, SLURM. Python, C/C++, SQL, Bash.
+
+=== WORK ETHIC & WHAT I WANT ===
+- I currently run THREE demanding responsibilities in parallel and do each well: sole ML engineer at Varosync, Teaching Co-Lead of AIDE, and my M.S. (4.0) + the BlueDot AI Safety cohort. Historically the same: ranked 2nd of 180+ while doing two research roles; 7 years volunteer teaching alongside full course loads.
+- I want a team's HARDEST, most ambiguous problems — the ones with no playbook. I take problems end-to-end (data/labels → training → eval → serving), check causally, test counterfactually, and report honestly (including negative results).
 
 === CONTACT ===
-- Email: ghosh.anik@northeastern.edu | Phone: 857-426-9732 | Location: Boston, MA
-
-=== PERSONAL BACKGROUND & STORY (from personal statements — these are TRUE facts about my life, but any mention of attending UC Berkeley is aspirational, NOT factual. I attend Northeastern University.) ===
-- Spent childhood traveling with father, an SAP consultant for IBM, across cities like Chicago, Bonn, and Zurich — exposed early to global disparities in education, healthcare, and infrastructure
-- Built first computer at age 12 — saved months for parts, spent hundreds of hours troubleshooting hardware; the experience taught patience, resourcefulness, and a belief that technology is a great equalizer
-- Top ranker in college (IEM Kolkata); professors were PhD scholars from Jadavpur University — had pick of research projects, chose healthcare-related ones
-- Cell segmentation research in healthcare was deeply personal — AI algorithms to count disease cells have real medical applications (rising counts = bad prognosis, decreasing = treatment working)
-- Developed interest in financial markets alongside tech — sees finance as a tool to amplify ideas and drive change, not just personal returns
-- Inspired by figures like Bill Gates and initiatives like AI-enabled ultrasounds — believes financial acumen guided by empathy can transform industries
-- Views finance and technology as complementary tools for scalable, real-world problem solving, especially in education and healthcare
-- Mother provides free tuition for underprivileged students — inspired Aniket to teach poor students at home whenever schedule allowed
-- Managed mother's philanthropic initiatives — collecting funds and reaching areas larger foundations can't due to bureaucratic barriers
-- Hands-on experience prioritizing spending on nutritious food packages and vocational workshops to maximize community impact
-- Learned that leadership is about listening to community needs and making decisions that truly benefit people
-- Believes education breaks cycles of poverty; committed to leveraging technology for equitable access and opportunity
-- Passionate about inclusive innovation — wants to collaborate with like-minded peers on systemic issues using technology, financial strategy, and human empathy
+Email: ghosh.anik@northeastern.edu · Phone: 857-426-9732 · Boston, MA · Portfolio: itsme-aniketghosh.github.io · GitHub: github.com/Itsme-aniketghosh · LinkedIn: linkedin.com/in/aniketghosh-
 """
 
 
+# ── Knowledge base: load markdown, chunk by section, embed at startup ─────
+class KnowledgeBase:
+    def __init__(self, kb_dir: str = "knowledge"):
+        self.chunks = []      # list of {"text", "source"}
+        self.matrix = None    # normalized embedding matrix (n, d)
+        self._load(kb_dir)
+
+    def _load(self, kb_dir):
+        paths = sorted(glob.glob(os.path.join(kb_dir, "*.md")))
+        for path in paths:
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    raw = f.read()
+            except Exception as e:
+                print(f"⚠️  Skipping {path}: {e}")
+                continue
+
+            title_match = re.search(r"^#\s+(.+)$", raw, re.MULTILINE)
+            doc_title = title_match.group(1).strip() if title_match else os.path.basename(path)
+
+            # Split on level-2 headings so each section is a coherent chunk.
+            parts = re.split(r"\n(?=##\s+)", raw)
+            for part in parts:
+                text = part.strip()
+                if len(text) < 40:
+                    continue
+                heading = re.match(r"##\s+(.+)", text)
+                label = f"{doc_title} — {heading.group(1).strip()}" if heading else doc_title
+                self.chunks.append({"text": text, "source": label})
+
+        if self.chunks:
+            texts = [c["text"] for c in self.chunks]
+            self.matrix = embedder.encode(
+                texts, normalize_embeddings=True, show_progress_bar=False
+            ).astype("float32")
+            print(f"✅ Knowledge base: {len(self.chunks)} sections embedded from {len(paths)} files")
+        else:
+            print("⚠️  No knowledge chunks loaded — falling back to RESUME_CONTEXT only")
+
+    def retrieve(self, query: str, top_k: int = 6, threshold: float = 0.18) -> str:
+        if not self.chunks or self.matrix is None:
+            return ""
+        try:
+            q = embedder.encode([query], normalize_embeddings=True).astype("float32")[0]
+            sims = self.matrix @ q  # cosine similarity (both normalized)
+            order = np.argsort(-sims)[:top_k]
+            picked = [self.chunks[i]["text"] for i in order if sims[i] >= threshold]
+            return "\n\n".join(picked)
+        except Exception as e:
+            print(f"❌ Retrieval error: {e}")
+            return ""
+
+
 class DigitalTwin:
-    def __init__(self, db_path: str = "vector_db"):
-        self.db_path = db_path
-        self.index = None
-        self.documents = None
-        self.load_database()
-    
-    def load_database(self):
-        try:
-            self.index = faiss.read_index(f"{self.db_path}/faiss_index.bin")
-            with open(f"{self.db_path}/documents.pkl", 'rb') as f:
-                self.documents = pickle.load(f)
-            print(f"✅ Loaded {len(self.documents)} documents")
-        except Exception as e:
-            print(f"⚠️ Database error: {e}")
-            self.documents = []
-    
-    def retrieve_context(self, query: str, top_k: int = 20) -> tuple:
-        """Retrieve comprehensive context"""
-        if not self.documents:
-            return "", []
-        
-        try:
-            query_embedding = embedder.encode([query])
-            distances, indices = self.index.search(query_embedding.astype('float32'), top_k)
-            
-            results = []
-            seen_content = set()
-            
-            for idx, distance in zip(indices[0], distances[0]):
-                doc = self.documents[idx]
-                similarity = 1 / (1 + distance)
-                
-                if similarity > 0.25:
-                    content_hash = doc['text'][:100]
-                    if content_hash not in seen_content:
-                        results.append({
-                            'text': doc['text'],
-                            'source': doc['source'],
-                            'similarity': float(similarity)
-                        })
-                        seen_content.add(content_hash)
-            
-            results.sort(key=lambda x: x['similarity'], reverse=True)
-            context_parts = [r['text'] for r in results[:15]]
-            
-            print(f"📚 Using {len(context_parts)} relevant sections")
-            
-            return "\n\n".join(context_parts), results
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            return "", []
-    
-    def call_llama(self, messages: list, max_tokens: int = 700):
-        """Call Llama 3.1 with streaming"""
-        try:
-            stream = client.chat_completion(
-                messages=messages,
-                model=MODEL_NAME,
-                max_tokens=max_tokens,
-                temperature=0.8,
-                top_p=0.9,
-                stream=True,
-            )
-            for chunk in stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
-        except Exception as e:
-            error_msg = str(e)
-            print(f"❌ API Error: {error_msg}")
-            
-            if "rate limit" in error_msg.lower():
-                yield "⚠️ Rate limit. Add HF token to .env for unlimited use."
-            elif "token" in error_msg.lower():
-                yield "⚠️ Check your HF_TOKEN in .env file."
-            else:
-                yield "⚠️ API error. Try again."
-    
-    def generate_response(self, query: str, context: str):
-        """Generate streaming response as digital twin"""
-        
-        if not context:
-            # Still use hardcoded resume even if RAG returns nothing
-            context = ""
-        
-        # --- CHANGE 1: Improved system prompt ---
-        system_prompt = """You are answering questions as this person's digital twin. You've been trained on their resume, personal statements, and experience.
+    def __init__(self):
+        self.kb = KnowledgeBase()
 
-FACTUAL GUARDRAILS (ALWAYS override any conflicting info from personal statements/SOPs):
-- You are Aniket Ghosh, currently a Master's student at NORTHEASTERN UNIVERSITY in Boston, NOT UC Berkeley or any other school
-- NEVER mention UC Berkeley, Berkeley, or any school other than Northeastern (current) and IEM Kolkata (undergrad)
-- Your undergrad was at Institute of Engineering & Management (IEM), Kolkata, India
-- Some of the context may come from application essays/SOPs written FOR other universities — treat those as expressions of your goals and motivations, NOT as facts about where you study
-- When in doubt, the RESUME section is the source of truth for facts (school, dates, roles, projects)
-- Your primary identity is AI/ML engineer and researcher — always lead with technical skills and projects
-- Finance, philanthropy, and community work are personal motivations that SUPPLEMENT your technical identity — never lead with them for professional questions
-- For elevator pitches and introductions: lead with "AI/ML engineer at Northeastern" → key projects/research → what drives you. Use the "WHO I AM" section as your guide
+    # ── LLM call with model fallback + streaming ──────────────────────────
+    def call_llm(self, messages, max_tokens=700, temperature=0.7):
+        last_err = None
+        for provider, model in MODEL_CHAIN:
+            produced = False
+            try:
+                for delta in _stream_model(provider, model, messages, max_tokens, temperature):
+                    produced = True
+                    yield delta
+                if produced:
+                    return
+            except Exception as e:
+                last_err = e
+                print(f"⚠️  {provider}:{model} failed: {str(e)[:140]}")
+                if produced:
+                    return  # don't restart a partially-streamed answer
+                continue
+        yield f"⚠️ All models are busy right now ({type(last_err).__name__ if last_err else 'no output'}). Please try again in a moment."
 
-GUIDELINES:
-- Answer in first person ("I have...", "My experience includes...")
-- Be genuine and authentic, not overly salesy
-- Highlight relevant skills and experiences naturally
-- Be honest about being early in career when appropriate
-- Show enthusiasm and willingness to learn
-- Use specific examples from the context — mention project names, outcomes, or problems solved
-- Keep responses to 3-4 short paragraphs max. Be conversational, not exhaustive
-- Never state proficiency as a percentage (e.g. "95% proficiency"). Instead, demonstrate skill depth through concrete examples
-- Don't claim "large-scale" or "production" experience unless the context explicitly supports it
-- End with a specific highlight or example, NOT a generic summary sentence like "Overall, I'm confident..."
-- Show your personality while remaining professional
+    def _full_context(self, query: str, top_k: int = 6) -> str:
+        retrieved = self.kb.retrieve(query, top_k=top_k)
+        if retrieved:
+            return f"{RESUME_CONTEXT}\n\n=== ADDITIONAL RELEVANT DETAIL ===\n{retrieved}"
+        return RESUME_CONTEXT
 
-TONE: Authentic, confident but humble, enthusiastic about opportunities
-GOAL: Help people understand who you are and what you bring to the table through concrete examples, not broad claims"""
+    # ── Tab 1: Chat ───────────────────────────────────────────────────────
+    def chat(self, message, history):
+        system_prompt = """You are answering as Aniket Ghosh's digital twin — speak in first person ("I built...", "My experience...").
 
-        # --- CHANGE 2: Tighter user prompt with length guidance ---
-        # Combine hardcoded resume with RAG-retrieved context
-        full_context = f"{RESUME_CONTEXT}\n\n=== ADDITIONAL RELEVANT DETAILS ===\n{context}"
-        
+FACTUAL GUARDRAILS (override anything that conflicts):
+- I attend NORTHEASTERN UNIVERSITY (M.S. in AI). Undergrad: IEM Kolkata. NEVER mention UC Berkeley or any other school.
+- I DO have industry experience: AI/ML Engineer at Varosync since May 2026 (sole ML engineer, drug-discovery startup, molecular-similarity search). Do not say I lack real-world experience.
+- My identity is AI/ML engineer + researcher. Lead with technical work. Personal/philanthropy background supplements but never leads professional answers.
+
+STYLE:
+- Authentic, confident, humble. Concrete over generic.
+- 2–4 short paragraphs. Use specific project names, metrics, and outcomes from the context.
+- When safety, interpretability, or hard problems come up, lean in — that's my focus.
+- Never state proficiency as a percentage. End on a specific note, not a generic summary."""
+
+        context = self._full_context(message, top_k=6)
         messages = [
             {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": f"""Context about me:
-{full_context}
-
-Question: {query}
-
-Answer naturally as me in 3-4 concise paragraphs. Lead with what's most relevant to the question. Use specific project names or examples from the context — avoid vague claims. End on a concrete note, not a generic closing."""
-            }
+            {"role": "user", "content": f"Context about me:\n{context}\n\nQuestion: {message}\n\nAnswer naturally as me — lead with what's most relevant, use specific examples, keep it tight."},
         ]
-        
-        # --- CHANGE 3: Reduced max_tokens from 700 to 500 to encourage conciseness ---
-        full_response = ""
-        for token in self.call_llama(messages, max_tokens=500):
-            full_response += token
-            # If we hit an error, yield fallback
-            if full_response.startswith("⚠️"):
-                yield f"""Based on my background:
+        out = ""
+        for tok in self.call_llm(messages, max_tokens=520, temperature=0.75):
+            out += tok
+            yield out
 
-{context}
-
-Feel free to ask me specific questions about my experience!"""
-                return
-            yield full_response
-    
-    def analyze_job_fit(self, job_description: str):
-        """Analyze job fit with streaming"""
-        
-        if not job_description.strip():
-            yield "Paste a job description and I'll analyze how my background aligns with the role!"
+    # ── Tab 2: Job fit ────────────────────────────────────────────────────
+    def analyze_job_fit(self, jd):
+        if not jd or not jd.strip():
+            yield "Paste a job description and I'll give you an honest, specific read on how I fit."
             return
-        
-        print(f"\n{'='*60}")
-        print(f"💼 Analyzing Job Fit")
-        print(f"{'='*60}")
-        
-        yield "🔍 Retrieving relevant background info..."
-        
-        query = f"skills experience projects coursework {job_description}"
-        context, results = self.retrieve_context(query, top_k=20)
-        
-        if not context:
-            print("📋 No RAG results, using resume context only")
-            context = ""
-        
-        print(f"📚 Analyzing with {len(results)} relevant sections")
-        
-        # --- CHANGE 4: More balanced job fit prompt with senior role handling ---
+        context = self._full_context(f"skills experience projects safety {jd}", top_k=8)
+        system_prompt = """You assess job fit for Aniket Ghosh — an early-career AI/ML engineer & researcher who NOW has real industry experience (sole ML engineer at Varosync since May 2026), strong projects, mechanistic-interpretability research (SCD), and an AI-safety direction (BlueDot 2026). Be fair, specific, and honest. First person where natural.
+
+Use the RESUME context as source of truth (Northeastern, not Berkeley; Varosync industry experience is real).
+
+FIRST classify the role: entry/new-grad/research-fellowship (0–2 yrs) vs senior/staff/principal (3+ yrs, "senior/staff/lead/principal").
+
+SCORING:
+- Entry/new-grad/research-eng role closely matching my profile: 8–9.5/10
+- AI safety / interpretability / evals role (research-eng level): score on real signal — SCD causal study, LLM bias audit, BlueDot, interpretability tooling — these are strong; 7.5–9/10 if aligned.
+- Adjacent technical role: 6–7.5/10
+- Senior (3–5+ yrs industry): 5–6.5/10 (I have ~1 yr startup experience — real but early; be honest)
+- Staff/Principal (7+ yrs): 3–5/10
+
+STRUCTURE (entry / matching / research-eng):
+## 🎯 Fit Score: X/10
+## ✅ Strong Alignments  (3–5, reference specific projects/skills/metrics)
+## 💪 Key Strengths  (what makes me compelling for THIS role)
+## 📈 Areas to Grow  (1–3 honest gaps)
+## 💡 Why I'd Be a Good Fit  (specific, not generic)
+
+STRUCTURE (senior/stretch):
+## 🎯 Fit Score: X/10  (state it's a stretch and why)
+## ⚠️ Experience Gap  (I have ~1 yr startup ML experience, not multi-year industry — name 2–3 specific unmet requirements)
+## ✅ What I DO Bring  (project/role-specific, honest about scale)
+## 🔴 Key Gaps  (hard, unsoftened)
+## 🛤️ Realistic Path  (what closes the gap)
+## 💡 Better Fit Right Now  (what level WOULD be a strong match)
+
+TONE: self-aware, honest, specific. Knowing where I stand is more impressive than overclaiming."""
         messages = [
-            {
-                "role": "system",
-                "content": """You are analyzing job fit for an early-career AI/ML candidate with a strong technical foundation. Be fair, specific, and honest.
-
-FACTUAL NOTE: The candidate is Aniket Ghosh, a Master's student at Northeastern University (NOT UC Berkeley or other schools that may appear in application essays). Use the RESUME section as the source of truth for facts.
-
-FIRST: Determine if this is an ENTRY-LEVEL role (0-2 years) or a SENIOR role (3+ years, "senior", "staff", "lead", "principal", "manager" in title, or requiring extensive industry experience).
-
-SCORING GUIDELINES:
-- **Entry-level role closely matching their skills/projects**: 8-9.5/10
-- **Related technical role with good overlap**: 7-8.5/10  
-- **Adjacent role with some transferable skills**: 6-7.5/10
-- **Senior role (3-5+ years required)**: 4-6/10 (be honest — experience gap is real)
-- **Staff/Principal level (7+ years)**: 3-5/10 (significant gap)
-- **Unrelated role**: 3-5/10
-
-CRITICAL: Base your score on actual evidence. For senior roles, do NOT sugarcoat — a 4/10 is fair and honest.
-
-=== IF ENTRY-LEVEL / MATCHING ROLE — Use this structure: ===
-
-## 🎯 Fit Score: X/10
-[1-2 sentence assessment grounded in specifics]
-
-## ✅ Strong Alignments
-[3-5 direct matches — reference specific skills, projects, or coursework from their background]
-
-## 💪 Key Strengths
-[2-3 advantages — what makes them a compelling candidate for THIS role specifically]
-
-## 📈 Areas to Grow
-[1-3 honest gaps — frame constructively but don't hide them]
-
-## 💡 Why I'd Be a Good Fit
-[2-3 sentences — genuine and specific, not generic]
-
-=== IF SENIOR / STRETCH ROLE — Use this DIFFERENT structure: ===
-
-## 🎯 Fit Score: X/10
-[1-2 sentences — be direct that this is a stretch role and why]
-
-## ⚠️ Experience Gap
-[Be specific: "This role requires X years of industry experience. I'm currently a Master's student with research and project experience but no full-time industry roles yet." List 2-3 specific requirements you clearly don't meet]
-
-## ✅ What I DO Bring
-[3-4 things from your background that partially overlap — be specific with project names but honest that they're academic/project-level, not production/industry-level]
-
-## 🔴 Key Gaps
-[2-4 hard gaps — things like "5+ years production ML experience", "team leadership", "system design at scale", etc. Don't soften these — just state them]
-
-## 🛤️ Realistic Path to This Role
-[2-3 sentences — what you'd need to get here. e.g. "After 2-3 years in an entry-level ML engineering role building production systems, I'd be well-positioned for a role like this."]
-
-## 💡 Better Fit Right Now
-[1-2 sentences suggesting what level of this role WOULD match, e.g. "The junior/entry-level version of this role would be a strong match — I'd score 8+/10 there."]
-
-TONE: Self-aware and honest. Showing you understand seniority levels is MORE impressive than pretending you're ready.
-GOAL: A credible assessment. Hiring managers respect candidates who know where they stand."""
-            },
-            {
-                "role": "user",
-                "content": f"""Job Description:
-{job_description}
-
-My Background:
-{RESUME_CONTEXT}
-
-=== Additional Relevant Details ===
-{context}
-
-Analyze how I fit this role. Be specific — reference my actual projects and skills. Be honest about gaps."""
-            }
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Job description:\n{jd}\n\nMy background:\n{context}\n\nAssess my fit — reference my actual projects/metrics, be honest about gaps."},
         ]
-        
-        full_response = ""
-        for token in self.call_llama(messages, max_tokens=900):
-            full_response += token
-            if full_response.startswith("⚠️"):
-                yield self.create_honest_analysis(job_description, results)
-                return
-            yield full_response
-    
-    # --- CHANGE 5: Fallback analysis with senior role handling ---
-    def create_honest_analysis(self, job_description: str, results: list) -> str:
-        """Create honest fallback analysis — detects senior roles"""
-        
-        jd_lower = job_description.lower()
-        senior_keywords = ['senior', 'staff', 'principal', 'lead', 'manager', '5+ years', '5 years',
-                          '7+ years', '8+ years', '10+ years', '4-6 years', '3+ years',
-                          'extensive experience', 'proven track record', 'led teams']
-        is_senior = any(kw in jd_lower for kw in senior_keywords)
-        
-        highlights = "\n\n".join([f"**{i}.** {r['text'][:250]}..." for i, r in enumerate(results[:4], 1)])
-        
-        if is_senior:
-            return f"""## 🎯 Fit Score: 4.5/10
+        out = ""
+        for tok in self.call_llm(messages, max_tokens=900, temperature=0.6):
+            out += tok
+            yield out
 
-This is a senior-level role, and I want to be upfront — there's a significant experience gap.
+    # ── Tab 3: Cover letter ───────────────────────────────────────────────
+    def cover_letter(self, company, role, jd):
+        if not company or not company.strip():
+            yield "Add the company name (and ideally the role + a few lines about them or the JD) and I'll draft a targeted cover letter."
+            return
+        company, role = company.strip(), (role or "").strip()
+        query = f"{company} {role} {jd} skills projects safety interpretability impact"
+        context = self._full_context(query, top_k=8)
+        system_prompt = """You write a targeted cover letter in Aniket Ghosh's first-person voice. Source of truth: the provided context (Northeastern; Varosync industry experience is real; SCD interpretability + LLM bias audit; AI-safety direction via BlueDot).
 
-## ⚠️ Experience Gap
+RULES:
+- Exactly 3 tight paragraphs (≈220–300 words total).
+- Para 1 — Hook: open with something specific about the company/role + my single strongest relevant signal. NO "I am excited to apply" / "I am writing to express interest".
+- Para 2 — Evidence: two concrete accomplishments with real metrics/names (e.g. SCD causal interpretability result, Varosync molecular-similarity pipeline, biomedical KG 0.94 ROC-AUC, LLM bias audit) framed around what THIS company needs.
+- Para 3 — Forward-looking close: what I'd work on there and the value I'd add; one sentence on fit; willing-to-take-the-hard-problems energy.
+- Voice: direct, confident, specific. BAN filler: "passionate", "team player", "fast learner", "perfect fit", "hit the ground running".
+- Start with "Dear [Company] Team," and end with "Best,\\nAniket Ghosh\\nghosh.anik@northeastern.edu". Output only the letter (Markdown)."""
+        user = f"Company: {company}\nRole: {role or '(not specified)'}\n"
+        if jd and jd.strip():
+            user += f"About the company / job description:\n{jd.strip()}\n"
+        user += f"\nMy background:\n{context}\n\nWrite the cover letter."
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user},
+        ]
+        out = ""
+        for tok in self.call_llm(messages, max_tokens=700, temperature=0.7):
+            out += tok
+            yield out
 
-This role requires multiple years of industry experience. I'm currently a Master's student at Northeastern University with strong research and project experience, but I don't have full-time industry experience yet.
+    # ── Tab 4: How I can help you ─────────────────────────────────────────
+    def how_i_help(self, company, focus):
+        if not company or not company.strip():
+            yield "Tell me the company name and what they're working on (or a problem they're facing) — I'll lay out exactly how I'd add value."
+            return
+        company, focus = company.strip(), (focus or "").strip()
+        query = f"{company} {focus} hard problems safety interpretability ML engineering impact ownership"
+        context = self._full_context(query, top_k=8)
+        system_prompt = """You write a focused, concrete "how I'd add value" pitch in Aniket Ghosh's first-person voice — for a specific company. Source of truth: the provided context.
 
-## ✅ What I DO Bring
+Emphasize, with evidence (real projects/metrics): complex-problem solving, AI-safety & evaluation rigor, end-to-end ownership, and capacity for hard work (currently runs 3 demanding responsibilities in parallel; wants the hardest problems).
 
-{highlights}
+STRUCTURE (Markdown, tight):
+## 🚀 What I'd bring on day one
+[2–4 bullets: capabilities mapped to what this company does — name specific skills/projects.]
 
-My academic and project work shows I understand the fundamentals well, but I recognize the difference between project-level and production-level experience.
+## 🧩 How I'd attack your hardest problem
+[1 short paragraph: take their stated focus/problem and describe concretely how I'd approach it — define the metric, build the pipeline/experiment, validate causally/counterfactually. If safety/evals/interpretability is relevant, connect to my SCD work.]
 
-## 🔴 Key Gaps
+## 🎯 Why me specifically
+[2–3 bullets: the rare combo — research (interpretability/evals with real results) + production ML (Varosync molecular-similarity pipeline) + clear communication; end-to-end ownership; thrives on the toughest, most ambiguous problems.]
 
-- **Industry experience**: No full-time ML/AI roles yet
-- **Production systems at scale**: My projects are academic/portfolio-level
-- **Team leadership**: I've mentored junior researchers but haven't led engineering teams
-- **System design at scale**: Haven't designed systems serving millions of users
-
-## 🛤️ Realistic Path to This Role
-
-After 3-4 years in an entry-level ML engineering role — building production systems, working on a team, and owning end-to-end projects — I'd be well-positioned for a role like this.
-
-## 💡 Better Fit Right Now
-
-The junior or entry-level version of this role would be a strong match for me — I'd score 8+/10 there. I have the technical foundation; I just need the industry experience to grow into senior responsibilities."""
-        
-        else:
-            return f"""## 🎯 Fit Score: 7.5/10
-
-Good alignment with this role based on my background.
-
-## ✅ Key Alignments
-
-{highlights}
-
-## 💪 What I Bring
-
-- **Solid Technical Foundation**: Relevant coursework and hands-on projects with modern frameworks
-- **Practical Experience**: Real implementations that go beyond classroom exercises
-- **Current Knowledge**: Comfortable with the latest tools and best practices in this space
-
-## 📈 Areas to Grow
-
-- Some role-specific tools or workflows I'd need to ramp up on
-- Transitioning from project-based work to team-based development workflows
-
-## 💡 Why I'd Be a Good Fit
-
-My project experience shows I can take concepts and build working solutions. I'm at the stage where I learn fastest by doing, and I'm looking for a team where I can contribute while growing into the role.
-
-Happy to discuss specifics — feel free to ask about any of my projects!"""
-    
-    def chat(self, message: str, history: list):
-        """Chat as digital twin with streaming"""
-        
-        print(f"\n{'='*60}")
-        print(f"💬 Query: {message[:60]}...")
-        print(f"{'='*60}")
-        
-        context, results = self.retrieve_context(message, top_k=20)
-        
-        if not results:
-            print("📋 No RAG results, using resume context only")
-        else:
-            print(f"📚 Retrieved {len(results)} sections")
-        
-        for partial in self.generate_response(message, context):
-            yield partial
-        
-        print(f"✅ Response ready")
-        print(f"{'='*60}\n")
+RULES: specific over generic; cite real metrics/names; be honest I'm early-career but high-leverage; no filler buzzwords. Confident, not arrogant."""
+        user = f"Company: {company}\nWhat they do / problem they're facing: {focus or '(not specified — infer from the company name and be general but still concrete)'}\n\nMy background:\n{context}\n\nWrite the pitch."
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user},
+        ]
+        out = ""
+        for tok in self.call_llm(messages, max_tokens=750, temperature=0.7):
+            out += tok
+            yield out
 
 
-# Initialize
-print("\n" + "="*60)
-print("🤖 DIGITAL TWIN ASSISTANT")
-print("Trained on Resume, Personal Statements, & Experience")
-print("="*60 + "\n")
+# ── Build ─────────────────────────────────────────────────────────────────
+print("\n" + "=" * 60)
+print("🤖 ANIKET GHOSH — DIGITAL TWIN")
+print(f"   Chain: {MODEL_CHAIN}")
+print("=" * 60 + "\n")
 
 twin = DigitalTwin()
 
-# Gradio interface
-with gr.Blocks(title="Digital Twin", theme=gr.themes.Soft()) as demo:
+THEME = gr.themes.Soft(
+    primary_hue="indigo", secondary_hue="sky", neutral_hue="slate",
+    font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+)
+
+CSS = """
+.gradio-container { max-width: 1080px !important; margin: 0 auto !important; }
+#twin-header { background: linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#0ea5e9 100%);
+  border-radius: 18px; padding: 26px 32px; margin-bottom: 12px;
+  box-shadow: 0 12px 32px rgba(79,70,229,.28); }
+#twin-header * { color: #fff !important; }
+#twin-header h1 { margin: 0 0 8px; font-size: 1.95rem; letter-spacing: -.02em; }
+#twin-header p { margin: 6px 0 0; opacity: .96; font-size: .97rem; line-height: 1.55; }
+.tabs button { font-weight: 600 !important; }
+button.primary, .twin-cta { background: linear-gradient(135deg,#4f46e5,#0ea5e9) !important;
+  border: none !important; color: #fff !important; font-weight: 600 !important;
+  border-radius: 12px !important; box-shadow: 0 6px 16px rgba(14,165,233,.25) !important; }
+button.primary:hover, .twin-cta:hover { filter: brightness(1.07); }
+.twin-out { background: var(--block-background-fill);
+  border: 1px solid var(--border-color-primary); border-radius: 14px;
+  padding: 16px 20px; min-height: 240px; }
+.twin-out h2 { margin-top: .5em; }
+#twin-footer, #twin-footer * { color: var(--body-text-color-subdued) !important; font-size: .8rem; }
+"""
+
+with gr.Blocks(title="Aniket Ghosh — Digital Twin") as demo:
     gr.Markdown("""
-    # 👤 My Digital Twin
-    ### I've trained this AI on my resume, personal statements, and SOPs. Ask me anything!
-    """)
-    
+    # 👤 Aniket Ghosh — Digital Twin
+    **AI/ML Engineer & Researcher** · ML Engineer @ Varosync · M.S. AI @ Northeastern (4.0) · AI Safety — interpretability & evals
+
+    Open to **Research Engineer** and **ML / AI Engineering** roles. Ask me anything, test a job fit, generate a cover letter, or see how I'd help your team.
+    """, elem_id="twin-header")
+
     with gr.Tabs():
-        # Tab 1: Chat
         with gr.Tab("💬 Chat With Me"):
-            gr.Markdown("""
-            ### Ask me about my background, skills, projects, or experience
-            This AI has been trained on my personal documents and can answer questions as if I'm responding directly.
-            """)
-            
+            gr.Markdown("Ask about my background, projects, interpretability/safety work, or how I work.")
             gr.ChatInterface(
                 twin.chat,
                 examples=[
-                    "Tell me about yourself and your background",
-                    "What's your experience with AI agents and orchestration tools?",
-                    "Walk me through your biomedical knowledge graph project",
-                    "Tell me about your research in medical imaging at CMATER Lab",
-                    "What's it like being a TA for an NLP course?",
+                    "Tell me about yourself and what you're working on",
+                    "What's the hardest / most complex problem you've solved?",
+                    "Walk me through your mechanistic interpretability work (SCD)",
+                    "Tell me about the molecular-similarity search you're building at Varosync",
+                    "Why are you interested in AI safety and interpretability?",
+                    "How do you handle a heavy workload?",
                     "What kind of role are you looking for?",
-                    "What sets you apart from other entry-level AI candidates?",
-                    "What's a technical challenge you overcame?",
+                    "What's your experience auditing models for bias?",
                 ],
                 cache_examples=False,
             )
-        
-        # Tab 2: Job Fit
+
         with gr.Tab("🎯 Job Fit Analysis"):
-            gr.Markdown("""
-            ### Paste any job description — I'll give you an honest assessment
-            Whether it's entry-level or senior, I'll tell you exactly where I stand and what the gaps are.
-            """)
-            
+            gr.Markdown("Paste any job description — I'll give an honest, specific read on where I stand, gaps included.")
             with gr.Row():
-                with gr.Column(scale=1):
-                    job_input = gr.Textbox(
-                        label="📋 Job Description",
-                        placeholder="""Paste the complete job description here...
+                with gr.Column():
+                    jf_in = gr.Textbox(label="📋 Job Description", lines=18,
+                                       placeholder="Paste the full job description here…")
+                    jf_btn = gr.Button("🔍 Analyze How I Fit", variant="primary", size="lg", elem_classes=["twin-cta"])
+                with gr.Column():
+                    jf_out = gr.Markdown(value="*I'll analyze the fit and be honest about strengths and gaps.*", elem_classes=["twin-out"])
+            jf_btn.click(twin.analyze_job_fit, inputs=jf_in, outputs=jf_out)
 
-I'm looking for entry-level/junior positions where I can:
-- Apply my technical skills
-- Learn from experienced team members
-- Contribute to meaningful projects
-- Grow professionally
+        with gr.Tab("✉️ Cover Letter Generator"):
+            gr.Markdown("Get a targeted, no-filler cover letter in my voice. Add the company, role, and a few lines about them (or the JD).")
+            with gr.Row():
+                with gr.Column():
+                    cl_company = gr.Textbox(label="🏢 Company", placeholder="e.g. Anthropic")
+                    cl_role = gr.Textbox(label="💼 Role", placeholder="e.g. Research Engineer, Interpretability")
+                    cl_jd = gr.Textbox(label="📋 About the company / job description (optional)", lines=12,
+                                       placeholder="Paste the JD or a few lines about the team/mission…")
+                    cl_btn = gr.Button("✍️ Generate Cover Letter", variant="primary", size="lg", elem_classes=["twin-cta"])
+                with gr.Column():
+                    cl_out = gr.Markdown(value="*Your tailored cover letter will appear here.*", elem_classes=["twin-out"])
+            cl_btn.click(twin.cover_letter, inputs=[cl_company, cl_role, cl_jd], outputs=cl_out)
 
-Example:
-Junior Machine Learning Engineer
-Entry-Level / 0-2 years experience
+        with gr.Tab("🤝 How I Can Help You"):
+            gr.Markdown("Tell me about your company and your hardest problem — I'll lay out concretely how I'd add value.")
+            with gr.Row():
+                with gr.Column():
+                    h_company = gr.Textbox(label="🏢 Company", placeholder="e.g. a frontier-model safety team")
+                    h_focus = gr.Textbox(label="🧩 What you do / your hardest problem", lines=12,
+                                         placeholder="e.g. We need reliable evals for deceptive behavior in agents…")
+                    h_btn = gr.Button("🚀 Show How I'd Help", variant="primary", size="lg", elem_classes=["twin-cta"])
+                with gr.Column():
+                    h_out = gr.Markdown(value="*A concrete value pitch will appear here.*", elem_classes=["twin-out"])
+            h_btn.click(twin.how_i_help, inputs=[h_company, h_focus], outputs=h_out)
 
-Requirements:
-• Bachelor's in CS or related field
-• Python programming
-• Understanding of ML fundamentals
-• Familiarity with PyTorch or TensorFlow
-• Good communication skills
-• Eager to learn
-
-Nice to have:
-• Personal projects or internship experience
-• Computer Vision coursework
-• GitHub portfolio
-""",
-                        lines=20
-                    )
-                    
-                    analyze_btn = gr.Button(
-                        "🔍 Analyze How I Fit This Role",
-                        variant="primary",
-                        size="lg"
-                    )
-                
-                with gr.Column(scale=1):
-                    analysis_output = gr.Markdown(
-                        label="📊 Honest Fit Assessment",
-                        value="*I'll analyze how my background matches this role and be honest about both strengths and gaps*"
-                    )
-            
-            analyze_btn.click(
-                fn=twin.analyze_job_fit,
-                inputs=job_input,
-                outputs=analysis_output
-            )
-            
-            gr.Examples(
-                examples=[
-                        ["Machine Learning Engineer\n\nEntry Level (0-2 years)\n\nRequirements:\n• Master's or Bachelor's in CS, ML, or related field\n• Strong Python programming skills\n• Proficiency in PyTorch or TensorFlow\n• Understanding of ML algorithms (classification, regression, clustering)\n• Experience with deep learning architectures (CNNs, RNNs, Transformers)\n• Familiarity with data preprocessing and feature engineering\n• Version control (Git)\n• Strong mathematical foundation (linear algebra, probability, statistics)\n\nNice to have:\n• Experience deploying ML models to production\n• Cloud platform experience (AWS, GCP, Azure)\n• Docker/Kubernetes knowledge\n• Published research or conference papers\n• Kaggle competitions or open-source contributions"],
-
-                        ["Computer Vision Engineer\n\nEntry Level (0-2 years)\n\nRequirements:\n• Master's or Bachelor's in CS, EE, or related field\n• Strong Python and C++ programming skills\n• Experience with OpenCV, PyTorch, or TensorFlow\n• Understanding of CNN architectures (ResNet, YOLO, U-Net)\n• Knowledge of image processing techniques\n• Familiarity with object detection, segmentation, or classification\n• Strong linear algebra and geometry fundamentals\n\nNice to have:\n• Experience with medical imaging or autonomous systems\n• 3D vision or depth estimation experience\n• Edge deployment (TensorRT, ONNX)\n• Research publications in computer vision\n• Experience with video analysis"],
-
-                        ["Applied Scientist / Research Engineer\n\nEntry Level (0-2 years)\n\nRequirements:\n• Master's degree in CS, ML, Statistics, or related field\n• Strong publication record or research experience\n• Deep understanding of ML/DL theory and methods\n• Proficiency in Python and scientific computing libraries\n• Experience designing and running experiments\n• Strong written and verbal communication skills\n• Ability to translate research into practical solutions\n\nNice to have:\n• PhD or PhD-track experience\n• First-author publications at top venues (NeurIPS, ICML, CVPR)\n• Industry research internship experience\n• Open-source research code contributions"],
-
-                        ["AI Engineer\n\nEntry Level (0-2 years)\n\nRequirements:\n• Bachelor's or Master's in CS or related field\n• Strong Python programming skills\n• Experience with ML frameworks (PyTorch, TensorFlow)\n• Familiarity with LLMs and GenAI tools\n• Understanding of RAG systems and prompt engineering\n• API development experience (REST, FastAPI)\n• Cloud platform basics (AWS, GCP, or Azure)\n• Strong problem-solving abilities\n\nNice to have:\n• Experience fine-tuning language models\n• Vector database experience (Pinecone, Weaviate)\n• MLOps/deployment experience\n• Full-stack development skills\n• Experience with LangChain or similar frameworks"],
-
-                        ["MLOps Engineer\n\nEntry Level (0-2 years)\n\nRequirements:\n• Bachelor's in CS, Engineering, or related field\n• Strong Python programming skills\n• Experience with Docker and containerization\n• Familiarity with CI/CD pipelines\n• Cloud platform experience (AWS, GCP, or Azure)\n• Understanding of ML model lifecycle\n• Version control (Git) and collaboration tools\n• Linux/Unix command line proficiency\n\nNice to have:\n• Kubernetes experience\n• MLflow, Kubeflow, or similar ML platforms\n• Infrastructure as Code (Terraform, CloudFormation)\n• Monitoring and logging systems\n• Data pipeline experience (Airflow, Spark)"],
-
-                        ["Data Scientist\n\nEntry Level (0-2 years)\n\nRequirements:\n• Master's or Bachelor's in Statistics, CS, or quantitative field\n• Strong Python and SQL skills\n• Statistical modeling and hypothesis testing\n• Machine learning fundamentals\n• Data visualization (matplotlib, seaborn, Tableau)\n• Experience with pandas and scikit-learn\n• Strong communication and storytelling with data\n\nNice to have:\n• A/B testing experience\n• Deep learning knowledge\n• Business domain expertise\n• Big data tools (Spark, Hadoop)\n• Causal inference experience"],
-
-                        ["Senior Machine Learning Engineer\n\n5+ years experience\n\nRequirements:\n• Master's or PhD in CS, ML, or related field\n• 5+ years of industry experience building and deploying ML systems at scale\n• Expert-level Python and proficiency in C++\n• Deep expertise in PyTorch or TensorFlow with production deployment\n• Experience designing end-to-end ML pipelines serving millions of users\n• Track record of leading ML projects from research to production\n• Strong system design skills for distributed training and inference\n• Experience mentoring junior engineers and leading technical discussions\n• Production experience with model monitoring, A/B testing, and CI/CD for ML\n\nNice to have:\n• Publications at top ML venues (NeurIPS, ICML, ICLR)\n• Experience with recommendation systems or search ranking\n• Kubernetes and large-scale infrastructure experience\n• Cross-functional leadership experience"],
-
-                        ["Staff AI Research Scientist\n\n8+ years experience\n\nRequirements:\n• PhD in Machine Learning, Computer Science, or related field\n• 8+ years of research experience with significant publication record\n• First-author papers at top-tier venues (NeurIPS, ICML, CVPR, ACL)\n• Proven ability to define and lead long-term research agendas\n• Experience transitioning research breakthroughs to production systems\n• Track record of mentoring PhD students and research engineers\n• Deep expertise in at least two areas: NLP, CV, RL, generative models\n• Strong cross-team collaboration and research leadership\n\nNice to have:\n• Experience founding or co-leading a research team\n• Open-source contributions used by the broader community\n• Industry research lab experience (Google Brain, FAIR, DeepMind)\n• Patents in AI/ML"],
-
-                        ["Principal Engineer — ML Platform\n\n10+ years experience\n\nRequirements:\n• 10+ years of software engineering experience, 5+ in ML infrastructure\n• Designed and built ML platforms serving 100M+ predictions/day\n• Expert in distributed systems, Kubernetes, and cloud architecture\n• Experience owning technical roadmap for ML platform teams (10+ engineers)\n• Deep knowledge of feature stores, model registries, and experiment tracking at scale\n• Track record of driving architectural decisions across multiple teams\n• Experience with GPU cluster management and training optimization\n• Strong stakeholder management and executive communication skills\n\nNice to have:\n• Experience at FAANG-scale ML infrastructure\n• Built real-time ML serving systems with <10ms latency\n• Conference talks or thought leadership in MLOps\n• Experience with ML compiler optimization (XLA, TVM)"],
-
-                        ["Senior Data Scientist — Product Analytics\n\n4-6 years experience\n\nRequirements:\n• Master's or PhD in Statistics, Economics, or quantitative field\n• 4-6 years of industry experience in product analytics or data science\n• Expert-level SQL and Python (pandas, statsmodels, scipy)\n• Deep experience designing and analyzing A/B tests at scale\n• Proven ability to influence product roadmap through data insights\n• Experience with causal inference methods (diff-in-diff, IV, RDD)\n• Strong business acumen and ability to translate data into strategy\n• Experience presenting to VP/C-level stakeholders\n\nNice to have:\n• Experience with Bayesian methods and multi-armed bandits\n• Built experimentation platforms or tooling\n• Domain expertise in SaaS, fintech, or marketplace products\n• Experience leading a small team of analysts"]
-                ],
-                inputs=job_input,
-            )
+    _primary_name = PRIMARY_MODEL.split("/")[-1].replace(":free", "")
+    gr.Markdown(
+        f"Built by Aniket Ghosh · RAG over my own knowledge base · "
+        f"{_primary_name} via {'OpenRouter (free)' if PRIMARY_PROVIDER == 'openrouter' else 'Hugging Face'}"
+        " · Llama-3.1-8B (HF) fallback · "
+        "[Portfolio](https://itsme-aniketghosh.github.io/) · [GitHub](https://github.com/Itsme-aniketghosh)",
+        elem_id="twin-footer",
+    )
 
 if __name__ == "__main__":
-    print("\n🚀 Starting Digital Twin...")
-    print("💬 Chat with my AI or analyze job fits")
-    print("📍 Open browser to URL below\n")
-    
-    demo.launch()
+    demo.launch(theme=THEME, css=CSS)

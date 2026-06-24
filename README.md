@@ -1,118 +1,84 @@
-# AI Digital Twin — Retrieval-Augmented Portfolio Assistant
+# AI Digital Twin — Knowledge-Grounded Portfolio Assistant
 
-A **production-style Retrieval-Augmented Generation (RAG) system** that builds an AI “digital twin” over personal documents (resume, statements, portfolio) and serves grounded, first-person responses through a conversational interface.
+An AI that answers as **Aniket Ghosh**: an AI/ML engineer and researcher (ML engineer at Varosync, M.S. AI at Northeastern) working on AI safety — mechanistic interpretability and evaluations. It replies in the first person, grounded in a personal knowledge base, through a chat interface plus three job-targeted tools.
 
-**Live deployment:**
-🔗 [https://ag-hosh-my-digital-twin.hf.space/](https://ag-hosh-my-digital-twin.hf.space/)
+**Live demo:** [ag-hosh-my-digital-twin.hf.space](https://ag-hosh-my-digital-twin.hf.space/)
 
 ---
 
 ## Overview
 
-This project demonstrates how to design and deploy a **document-grounded LLM system** with explicit control over retrieval, chunking, context assembly, and generation parameters.
+A Retrieval-Augmented Generation (RAG) system that grounds an LLM in a personal knowledge base instead of fine-tuning. Every answer is conditioned on retrieved source text, so it stays close to what's actually written about me.
 
-Rather than fine-tuning, the system uses **semantic retrieval + prompt-grounded generation** to ensure responses remain accurate, explainable, and aligned with source documents.
+Knowledge lives in editable Markdown under [`knowledge/`](knowledge/). At startup the files are split by section, embedded, and indexed in memory. Each query pulls the most similar sections, which are combined with a fixed resume context that's always included.
 
 ---
 
-## System Architecture
+## Features
+
+- **Chat With Me.** Ask about my background, projects, interpretability/safety work, or how I work.
+- **Job Fit Analysis.** Paste a job description and get an honest, specific read on fit, gaps included.
+- **Cover Letter Generator.** Targeted, no-filler cover letters in my voice.
+- **How I Can Help You.** A concrete value pitch for a given company or problem.
+
+---
+
+## System architecture
 
 ```
 User Query
    ↓
-Dense Embedding
+Dense Embedding (all-MiniLM-L6-v2)
    ↓
-FAISS Vector Retrieval
+Cosine Similarity Retrieval over knowledge/*.md
    ↓
-Context Assembly
+Context Assembly (retrieved sections + always-on resume context)
    ↓
-Llama 3.1 Instruct
+LLM (model fallback chain, streamed)
    ↓
-Grounded Response
+Grounded First-Person Response
 ```
 
 ---
 
-## Core Design
+## How it works
 
-### Retrieval-Augmented Generation
+**Knowledge and retrieval.** The Markdown in `knowledge/` is chunked by level-2 heading, embedded with `sentence-transformers/all-MiniLM-L6-v2` (384-dim, normalized), and held in memory. Retrieval is plain cosine similarity — top-K above a threshold, no external vector store. The retrieved sections sit next to a fixed resume context, so answers stay anchored even when retrieval misses.
 
-* **Embeddings**: `sentence-transformers/all-MiniLM-L6-v2` (384-dim)
-* **Vector Store**: FAISS (L2 distance)
-* **LLM**: `meta-llama/Llama-3.1-8B-Instruct`
-* **Interface**: Gradio (Hugging Face Spaces)
+**Generation with fallback.** The app walks a chain of models until one streams a real answer:
 
-The LLM never answers without retrieved context. All responses are conditioned on document-derived evidence.
+1. OpenRouter free-tier models first, with `openai/gpt-oss-120b:free` as primary and several alternates behind it.
+2. `meta-llama/Llama-3.1-8B-Instruct` on Hugging Face as the final fallback.
 
----
-
-### Chunking Strategy
-
-```python
-CHUNK_SIZE = 300       # words
-CHUNK_OVERLAP =  50     # words
-```
-
-**Rationale**
-
-* Personal documents are semantically dense and narrative-driven
-* Larger chunks preserve continuity across experience sections
-* Reduces fragmentation and improves reasoning quality
-* Overlap prevents boundary loss between sections
+Answers stream token by token, and a half-streamed answer is never restarted if a later model in the chain fails.
 
 ---
 
-### Retrieval & Context Assembly
+## Configuration
 
-* Top-K semantic retrieval using FAISS
-* Similarity filtering to remove weak matches
-* Deduplication of overlapping content
-* Top results assembled into a single prompt context
+The app picks a provider based on what you set:
 
-This balances **precision, recall, and prompt budget efficiency**.
+| Variable | Purpose |
+| --- | --- |
+| `OPENROUTER_API_KEY` | Use OpenRouter free-tier models (the preferred primary). |
+| `HF_TOKEN` | Hugging Face Inference token, used for the fallback model. |
+| `TWIN_MODEL` | Optional. Override the primary model id. |
 
----
-
-### Generation Configuration
-
-```python
-temperature = 0.8
-top_p = 0.9
-max_tokens = 700–900
-```
-
-* Optimized for natural but controlled responses
-* First-person voice (“digital twin”)
-* Factual, concise, and interview-oriented
----
-
-## Performance (Observed)
-
-* Vector search: sub-millisecond
-* End-to-end latency: ~2–5 seconds
-* Scales comfortably for small–medium document sets
-
+Copy `.env.example` to `.env` and fill in whichever keys you have. To change what the twin knows, edit the files in `knowledge/`.
 
 ---
 
-## Technology Stack
+## Technology stack
 
-* Python
-* Sentence Transformers
-* FAISS
-* Llama 3.1
-* Gradio
-* Hugging Face Inference API
-
+Python, Sentence Transformers for embeddings, OpenRouter and the Hugging Face Inference API for generation, Gradio for the interface, NumPy for the math.
 
 ---
 
-## Running Locally
+## Running locally
 
 ```bash
 pip install -r requirements.txt
-python create_vector_db.py
 python app.py
 ```
 
-(Optional) Add a Hugging Face token for higher rate limits.
+Set `OPENROUTER_API_KEY` and/or `HF_TOKEN` in a `.env` file first (see [Configuration](#configuration)).
