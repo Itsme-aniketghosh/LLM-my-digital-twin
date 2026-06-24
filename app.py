@@ -369,7 +369,7 @@ CSS = """
   border-radius: 18px; padding: 26px 32px; margin-bottom: 12px;
   box-shadow: 0 12px 32px rgba(79,70,229,.28); }
 #twin-header * { color: #fff !important; }
-#twin-header h1 { margin: 0 0 8px; font-size: 1.95rem; letter-spacing: -.02em; }
+#twin-header h1 { margin: 0 0 8px; font-size: 1.95rem; letter-spacing: -.02em; line-height: 1.2; }
 #twin-header p { margin: 6px 0 0; opacity: .96; font-size: .97rem; line-height: 1.55; }
 .tabs button { font-weight: 600 !important; }
 button.primary, .twin-cta { background: linear-gradient(135deg,#4f46e5,#0ea5e9) !important;
@@ -380,10 +380,26 @@ button.primary:hover, .twin-cta:hover { filter: brightness(1.07); }
   border: 1px solid var(--border-color-primary); border-radius: 14px;
   padding: 16px 20px; min-height: 240px; }
 .twin-out h2 { margin-top: .5em; }
+.twin-out * { overflow-wrap: anywhere; }
 #twin-footer, #twin-footer * { color: var(--body-text-color-subdued) !important; font-size: .8rem; }
+
+/* ── Mobile: stack the input/output panes full-width, tighten the chrome ── */
+@media (max-width: 768px) {
+  .gradio-container { padding-left: 6px !important; padding-right: 6px !important; }
+  /* the .twin-pane row is a flexbox; switch it to a column so the input sits
+     on top and the answer below, instead of two squished half-width panes */
+  .twin-pane { flex-direction: column !important; flex-wrap: nowrap !important; gap: 12px !important; }
+  .twin-pane > * { width: 100% !important; min-width: 0 !important; flex: 1 1 auto !important; }
+  #twin-header { padding: 18px 18px; border-radius: 14px; margin-bottom: 8px; }
+  #twin-header h1 { font-size: 1.4rem; }
+  #twin-header p { font-size: .85rem; line-height: 1.5; }
+  .tabs button { font-size: .9rem !important; padding: 8px 10px !important; }
+  button.primary, .twin-cta { width: 100% !important; }
+  .twin-out { min-height: 150px; padding: 14px 16px; }
+}
 """
 
-with gr.Blocks(title="Aniket Ghosh — Digital Twin") as demo:
+with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as demo:
     gr.Markdown("""
     # 👤 Aniket Ghosh — Digital Twin
     **AI/ML Engineer & Researcher** · ML Engineer @ Varosync · M.S. AI @ Northeastern (4.0) · AI Safety — interpretability & evals
@@ -411,7 +427,7 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin") as demo:
 
         with gr.Tab("🎯 Job Fit Analysis"):
             gr.Markdown("Paste any job description — I'll give an honest, specific read on where I stand, gaps included.")
-            with gr.Row():
+            with gr.Row(elem_classes=["twin-pane"]):
                 with gr.Column():
                     jf_in = gr.Textbox(label="📋 Job Description", lines=18,
                                        placeholder="Paste the full job description here…")
@@ -422,7 +438,7 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin") as demo:
 
         with gr.Tab("✉️ Cover Letter Generator"):
             gr.Markdown("Get a targeted, no-filler cover letter in my voice. Add the company, role, and a few lines about them (or the JD).")
-            with gr.Row():
+            with gr.Row(elem_classes=["twin-pane"]):
                 with gr.Column():
                     cl_company = gr.Textbox(label="🏢 Company", placeholder="e.g. Anthropic")
                     cl_role = gr.Textbox(label="💼 Role", placeholder="e.g. Research Engineer, Interpretability")
@@ -435,7 +451,7 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin") as demo:
 
         with gr.Tab("🤝 How I Can Help You"):
             gr.Markdown("Tell me about your company and your hardest problem — I'll lay out concretely how I'd add value.")
-            with gr.Row():
+            with gr.Row(elem_classes=["twin-pane"]):
                 with gr.Column():
                     h_company = gr.Textbox(label="🏢 Company", placeholder="e.g. a frontier-model safety team")
                     h_focus = gr.Textbox(label="🧩 What you do / your hardest problem", lines=12,
@@ -455,4 +471,4 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch(theme=THEME, css=CSS)
+    demo.launch()
