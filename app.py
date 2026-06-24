@@ -435,6 +435,19 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
                 with gr.Column():
                     jf_out = gr.Markdown(value="*I'll analyze the fit and be honest about strengths and gaps.*", elem_classes=["twin-out"])
             jf_btn.click(twin.analyze_job_fit, inputs=jf_in, outputs=jf_out)
+            gr.Examples(
+                label="🧪 Try a sample job description (click to fill & run)",
+                examples=[
+                    ["Research Engineer, Interpretability — Investigate the internals of frontier language models: build tooling and run experiments to reverse-engineer learned representations, evaluate model behavior, and surface safety-relevant failure modes. Strong Python + ML and a research mindset required."],
+                    ["Machine Learning Engineer (early-career) — Build and ship ML systems end-to-end: data pipelines, model training, evaluation, and serving. Experience with PyTorch, embeddings, and vector search; comfortable owning projects from scratch."],
+                    ["Staff Research Scientist — 7+ years leading large-scale ML research, first-author publications at top venues, and experience setting multi-year research agendas and mentoring teams on frontier models."],
+                ],
+                inputs=jf_in,
+                outputs=jf_out,
+                fn=twin.analyze_job_fit,
+                run_on_click=True,
+                cache_examples=False,
+            )
 
         with gr.Tab("✉️ Cover Letter Generator"):
             gr.Markdown("Get a targeted, no-filler cover letter in my voice. Add the company, role, and a few lines about them (or the JD).")
@@ -448,6 +461,18 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
                 with gr.Column():
                     cl_out = gr.Markdown(value="*Your tailored cover letter will appear here.*", elem_classes=["twin-out"])
             cl_btn.click(twin.cover_letter, inputs=[cl_company, cl_role, cl_jd], outputs=cl_out)
+            gr.Examples(
+                label="🧪 Try a sample (click to fill & run)",
+                examples=[
+                    ["Anthropic", "Research Engineer, Interpretability", "We build tools to understand the internals of frontier models and make them safer through mechanistic interpretability and evaluations."],
+                    ["Scale AI", "Machine Learning Engineer", "We build data and evaluation infrastructure for frontier AI models."],
+                ],
+                inputs=[cl_company, cl_role, cl_jd],
+                outputs=cl_out,
+                fn=twin.cover_letter,
+                run_on_click=True,
+                cache_examples=False,
+            )
 
         with gr.Tab("🤝 How I Can Help You"):
             gr.Markdown("Tell me about your company and your hardest problem — I'll lay out concretely how I'd add value.")
@@ -460,6 +485,18 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
                 with gr.Column():
                     h_out = gr.Markdown(value="*A concrete value pitch will appear here.*", elem_classes=["twin-out"])
             h_btn.click(twin.how_i_help, inputs=[h_company, h_focus], outputs=h_out)
+            gr.Examples(
+                label="🧪 Try a sample (click to fill & run)",
+                examples=[
+                    ["A frontier-model safety team", "We need reliable evals for deceptive behavior and scheming in agentic LLMs."],
+                    ["An early-stage biotech", "Scaling molecular-similarity search and embeddings over millions of compounds for drug discovery."],
+                ],
+                inputs=[h_company, h_focus],
+                outputs=h_out,
+                fn=twin.how_i_help,
+                run_on_click=True,
+                cache_examples=False,
+            )
 
     _primary_name = PRIMARY_MODEL.split("/")[-1].replace(":free", "")
     gr.Markdown(
