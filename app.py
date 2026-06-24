@@ -178,6 +178,16 @@ class KnowledgeBase:
             return ""
 
 
+# Shared output-formatting contract so every tab renders the same way each run.
+STRUCTURED_FORMAT = """
+
+OUTPUT FORMATTING (strict — identical every time):
+- Markdown only. NEVER use tables, pipe characters (|), or multi-column layouts. Render every comparison, gap, or mapping as `- ` bullet points under the relevant heading.
+- Use the exact `## ` section headings specified above, in that order. Put nothing before the first heading and nothing after the last (no preamble, no "bottom line", no extra summary or sign-off).
+- Under each heading use short `- ` bullets (one point each, 1–2 sentences) and/or one tight paragraph — applied consistently. Bullets stay one level deep, with no nested sub-bullets.
+- Use only the emoji that appear in the specified headings; add none elsewhere."""
+
+
 class DigitalTwin:
     def __init__(self):
         self.kb = KnowledgeBase()
@@ -266,7 +276,7 @@ STRUCTURE (senior/stretch):
 ## 🛤️ Realistic Path  (what closes the gap)
 ## 💡 Better Fit Right Now  (what level WOULD be a strong match)
 
-TONE: self-aware, honest, specific. Knowing where I stand is more impressive than overclaiming."""
+TONE: self-aware, honest, specific. Knowing where I stand is more impressive than overclaiming.""" + STRUCTURED_FORMAT
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Job description:\n{jd}\n\nMy background:\n{context}\n\nAssess my fit — reference my actual projects/metrics, be honest about gaps."},
@@ -292,7 +302,7 @@ RULES:
 - Para 2 — Evidence: two concrete accomplishments with real metrics/names (e.g. SCD causal interpretability result, Varosync molecular-similarity pipeline, biomedical KG 0.94 ROC-AUC, LLM bias audit) framed around what THIS company needs.
 - Para 3 — Forward-looking close: what I'd work on there and the value I'd add; one sentence on fit; willing-to-take-the-hard-problems energy.
 - Voice: direct, confident, specific. BAN filler: "passionate", "team player", "fast learner", "perfect fit", "hit the ground running".
-- Start with "Dear [Company] Team," and end with "Best,\\nAniket Ghosh\\nghosh.anik@northeastern.edu". Output only the letter (Markdown)."""
+- Start with "Dear [Company] Team," and end with "Best,\\nAniket Ghosh\\nghosh.anik@northeastern.edu". Output only the letter (Markdown) — flowing prose paragraphs only, with no tables, headings, or bullet lists."""
         user = f"Company: {company}\nRole: {role or '(not specified)'}\n"
         if jd and jd.strip():
             user += f"About the company / job description:\n{jd.strip()}\n"
@@ -328,7 +338,7 @@ STRUCTURE (Markdown, tight):
 ## 🎯 Why me specifically
 [2–3 bullets: the rare combo — research (interpretability/evals with real results) + production ML (Varosync molecular-similarity pipeline) + clear communication; end-to-end ownership; thrives on the toughest, most ambiguous problems.]
 
-RULES: specific over generic; cite real metrics/names; be honest I'm early-career but high-leverage; no filler buzzwords. Confident, not arrogant."""
+RULES: specific over generic; cite real metrics/names; be honest I'm early-career but high-leverage; no filler buzzwords. Confident, not arrogant.""" + STRUCTURED_FORMAT
         user = f"Company: {company}\nWhat they do / problem they're facing: {focus or '(not specified — infer from the company name and be general but still concrete)'}\n\nMy background:\n{context}\n\nWrite the pitch."
         messages = [
             {"role": "system", "content": system_prompt},
