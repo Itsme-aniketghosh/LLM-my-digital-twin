@@ -1,0 +1,1765 @@
+# ANIKET GHOSH - COMPLETE PROFILE
+# Last Updated: January 2026
+
+================================================================================
+SECTION 1: BASIC INFORMATION
+================================================================================
+
+Full Name: Aniket Ghosh
+Current Location: Boston, Massachusetts, USA
+Email (Primary): aniket.ghosh@gmail.com
+Email (University): ghosh.anik@northeastern.edu
+Phone: 857-426-9732
+LinkedIn: linkedin.com/in/aniketghosh-
+GitHub: github.com/Ag-hosh
+CodeChef: codechef.com/users/a_ghosh (4-Star, Rating: 1911)
+HackerRank: hackerrank.com/profile/aniket_ghosh (5-Star in 5 languages)
+Languages Spoken: English (Fluent), Hindi (Fluent), Bengali (Native)
+
+Current Status: First-year MS in AI student at Northeastern University, Boston
+Visa Status: F-1 Student Visa
+Work Authorization: Eligible for CPT/OPT
+
+================================================================================
+SECTION 2: CURRENT ACADEMIC STATUS
+================================================================================
+
+## Current Program
+- Degree: Master of Science in Artificial Intelligence
+- University: Northeastern University, Khoury College of Computer Sciences
+- Location: Boston, MA, USA
+- Intake: Fall 2025
+- Expected Graduation: May 2027
+- Concentration: Machine Learning
+- Scholarship: Awarded 15% departmental scholarship for academic merit and research potential
+- Total Program Credits: 32 semester hours required
+- Minimum GPA Required: 3.000
+
+## Completed Semester (Fall 2025)
+1. Algorithms (CS 5800)
+   - Instructor: Professor Mahsa Derakhshan
+   - Final Grade: 100/100 (A)
+   - Topics: Algorithm design, complexity analysis, dynamic programming, graph algorithms
+   - Link: https://www.khoury.northeastern.edu/people/mahsa-derakhshan/
+
+2. Foundations of Artificial Intelligence (CS 5100)
+   - Instructor: Professor Amir Tahmasebi (Amir Maragoosh)
+   - Final Grade: 99/100 (A)
+   - Topics: Search algorithms, knowledge representation, machine learning basics, neural networks
+   - Link: https://www.khoury.northeastern.edu/people/amir-tahmasebi/
+   - Note: Exceptional performance led to TA selection for NLP course
+
+## Current Semester Courses (Spring 2026)
+1. Applied Programming and Data Processing for AI (CS 5130)
+   - Instructors: Bryan Wallace and Yu Jin
+   - Topics: Python for AI, data preprocessing, pipeline development, practical AI implementation
+   - Part of core MSAI curriculum
+
+2. Special Topics PhD Non-Seminar Course: Actionable Interpretable Methods
+   - Level: PhD-level course
+   - Note: Obtained special permission to take this advanced PhD-level course as MS student
+   - Topics: Explainable AI (XAI), interpretable machine learning, model transparency, SHAP, LIME
+   - Focus: Making AI systems understandable and actionable for real-world deployment
+
+## Courses Waived/Dropped
+- Mathematics for Machine Learning (DADS 5200/DS 5020) - Waived due to strong prior mathematical background
+- Introduction to Machine Learning and Pattern Recognition (EECE 5644) - Waived due to extensive ML experience
+- Note: Aniket is qualified to be a Teaching Assistant for these waived courses
+
+## Teaching Assistantship (Current)
+- Position: Graduate Teaching Assistant for NLP (Natural Language Processing)
+- Course Level: Graduate (MS/PhD)
+- Supervisor: Professor Amir Tahmasebi
+- Responsibilities:
+  - Conducting lab practical sessions on PyTorch
+  - Teaching ML and Deep Learning code walkthroughs
+  - Guiding students through neural network implementations
+  - Assisting with NLP pipeline development
+  - Grading assignments and providing feedback
+- Selection: Chosen as TA without having taken the NLP course, based on exceptional performance (99/100) in Foundations of AI
+- Significance: This is a highly competitive and sought-after TA position at Northeastern's Khoury College
+
+## Program Structure - MS in Artificial Intelligence (Machine Learning Concentration)
+
+### Core Requirements (All Concentrations):
+- CS 5100: Foundations of Artificial Intelligence (4 credits) - COMPLETED
+- CS 5130: Applied Programming and Data Processing for AI (4 credits) - IN PROGRESS
+- DADS 5200/DS 5020: Mathematics for Machine Learning (4 credits) - WAIVED
+- EECE 5644/DADS 7275: Machine Learning and Pattern Recognition (4 credits) - WAIVED
+
+### Machine Learning Concentration Requirements:
+- CS 5800: Algorithms (4 credits) - COMPLETED
+- 8 semester hours from: CS 5180 (Reinforcement Learning), CS 5330 (Pattern Recognition & CV), CS 6120 (NLP), CS 6200 (Information Retrieval), CS 6220 (Data Mining), CS 7140 (Advanced ML), CS 7150 (Deep Learning), CS 7180 (Special Topics in AI)
+- Capstone: CS 6170 (AI Capstone) or CS 8674 (Master's Project)
+
+================================================================================
+SECTION 3: UNDERGRADUATE EDUCATION
+================================================================================
+
+- Degree: Bachelor of Technology (B.Tech) in Computer Science and Business Systems
+- University: Institute of Engineering and Management (IEM), Kolkata, India
+- Affiliation: Constituent institute of UEM Kolkata
+- Duration: July 2020 - June 2024
+- GPA: 9.3/10 (Equivalent to 4.0/4.0 in US scale)
+- WES Evaluated GPA: 4.00 (World Education Services credential evaluation)
+- Total Credits: 184.5 undergraduate semester credits
+
+## Key Undergraduate Achievements
+- Director's Award for Top Student Contribution - highest honor for academic excellence and campus contribution
+- 2nd Rank in department of 180+ students during final year
+- Top 5% in WBJEE (West Bengal Joint Entrance Examination) - competitive state-level engineering entrance exam
+- Consistent A grades across all semesters (SGPA range: 9.05 - 9.60)
+
+## Semester-wise Performance
+- Year 1 Sem 1: SGPA 9.24
+- Year 1 Sem 2: SGPA 9.05, YGPA 9.14
+- Year 2 Sem 1: SGPA 9.39
+- Year 2 Sem 2: SGPA 9.28, YGPA 9.33
+- Year 3 Sem 1: SGPA 9.07
+- Year 3 Sem 2: SGPA 9.36, YGPA 9.21
+- Year 4 Sem 1: SGPA 9.30
+- Year 4 Sem 2: SGPA 9.60
+
+## Notable Undergraduate Courses (with grades)
+- Neural Networks and Deep Learning (Grade: E/9.0)
+- Natural Language Processing (Grade: E/9.0)
+- Pattern Recognition (Grade: E/9.0)
+- Computational Finance (Grade: O/10.0)
+- Blockchain Technology (Grade: E/9.0)
+- Cloud Computing & IoT (Grade: O/10.0)
+- Advanced Deep Learning (Grade: O/10.0)
+- Data Science Using Python (Grade: O/10.0)
+- Artificial Intelligence & Machine Learning (Grade: E/9.0)
+- Database Management Systems (Grade: E/9.0)
+- Design & Analysis of Algorithms (Grade: E/9.0)
+- Operating Systems (Grade: E/9.0)
+- Computer Networks (Grade: O/10.0)
+- Compiler Design (Grade: O/10.0)
+- Discrete Mathematics (Grade: E/9.0)
+- Data Structure & Algorithms (Grade: E/9.0)
+- Software Engineering (Grade: E/9.0)
+
+## Grading Scale Reference (IEM/MAKAUT)
+- O (Outstanding): 10.0 points
+- E (Excellent): 9.0 points
+- A (Very Good): 8.0 points
+- B (Good): 7.0 points
+
+================================================================================
+SECTION 4: TECHNICAL SKILLS - COMPREHENSIVE
+================================================================================
+
+## Programming Languages
+
+### Python (Expert Level)
+- Primary language for all AI/ML work
+- Extensive experience with: NumPy, Pandas, Matplotlib, Seaborn
+- Web frameworks: Flask, FastAPI, Gradio
+- Testing: pytest, unittest
+- Package management: pip, conda, poetry
+- Years of experience: 5+
+
+### C/C++ (Expert Level)
+- Systems programming
+- Algorithm implementation
+- High-performance computing
+- Memory management and optimization
+- CodeChef competitive programming (4-star)
+
+### Java (Advanced Level)
+- Object-oriented programming
+- Android development basics
+- HackerRank 5-star certification
+- Enterprise application understanding
+
+### JavaScript (Advanced Level)
+- Frontend development
+- React basics
+- Node.js fundamentals
+- Web scraping
+
+### SQL (Advanced Level)
+- Database design and querying
+- PostgreSQL, MySQL
+- Query optimization
+- Data analysis
+
+### HTML/CSS (Advanced Level)
+- Web development
+- Responsive design
+- UI/UX basics
+
+## LLM & Generative AI Skills
+
+### RAG (Retrieval-Augmented Generation)
+- End-to-end RAG pipeline development
+- Document chunking strategies (recursive, semantic, sentence-based)
+- Embedding models: OpenAI embeddings, sentence-transformers, HuggingFace embeddings
+- Vector similarity search implementation
+- Context window optimization
+- Source citation and attribution
+- Hallucination mitigation techniques
+
+### Vector Databases
+- ChromaDB (Primary experience)
+- Understanding of: Pinecone, Milvus, pgvector, FAISS, Qdrant
+- Embedding storage and retrieval
+- Similarity search optimization
+- Metadata filtering
+
+### LLM Frameworks & Tools
+- LangChain: Chains, agents, memory, callbacks, document loaders
+- LangGraph: Multi-agent orchestration, state management, conditional flows
+- Hugging Face: Transformers, datasets, tokenizers, model hub
+- OpenAI API: GPT-4, GPT-4o, embeddings, function calling
+- Anthropic API: Claude models, system prompts
+- Gradio: Interactive ML app interfaces
+- Streamlit: Data app development
+
+### Prompt Engineering
+- Zero-shot prompting
+- Few-shot prompting
+- Chain-of-thought (CoT) prompting
+- System prompt design
+- Prompt templates and optimization
+- Output parsing and structured generation
+
+### Fine-tuning Techniques
+- LoRA (Low-Rank Adaptation)
+- QLoRA (Quantized LoRA)
+- PEFT (Parameter-Efficient Fine-Tuning)
+- Hugging Face TRL and SFTTrainer
+- Dataset preparation for fine-tuning
+- Evaluation metrics for fine-tuned models
+
+## AI Agents & Orchestration
+
+### Agent Frameworks
+- OpenAI Agents SDK: Function calling, tool use, multi-turn conversations
+- CrewAI: Multi-agent collaboration, role-based agents, task delegation
+- AutoGen: Conversational agents, code execution, group chat
+- LangGraph: Stateful agent workflows, conditional branching
+
+### MCP (Model Context Protocol)
+- Server implementation
+- Tool integration (44+ tools experience)
+- Multi-server orchestration
+- Real-time agent communication
+
+### Agent Architecture Patterns
+- ReAct (Reasoning + Acting)
+- Plan-and-Execute
+- Multi-agent collaboration
+- Autonomous decision-making
+- Tool selection and execution
+
+## Machine Learning Frameworks
+
+### PyTorch (Expert Level)
+- Neural network implementation from scratch
+- Custom dataset and dataloader creation
+- Model training loops
+- GPU acceleration (CUDA)
+- Model serialization and deployment
+- Teaching PyTorch in NLP TA role
+
+### TensorFlow/Keras (Advanced Level)
+- Sequential and functional API
+- Custom layers and models
+- Transfer learning
+- Model optimization
+
+### scikit-learn (Advanced Level)
+- Classification, regression, clustering
+- Feature engineering
+- Model selection and evaluation
+- Pipeline creation
+
+### Computer Vision Libraries
+- YOLOv8: Object detection, custom training
+- OpenCV: Image processing, video analysis
+- Mask R-CNN: Instance segmentation
+- U-Net: Semantic segmentation
+
+### NLP Libraries
+- Hugging Face Transformers
+- NLTK
+- spaCy
+- Gensim
+
+## MLOps & Cloud Platforms
+
+### Amazon Web Services (AWS)
+- Amazon Bedrock: Foundation model access, RAG, agents
+- Amazon SageMaker: Model training, deployment, endpoints
+- AWS Lambda: Serverless functions
+- Amazon S3: Object storage
+- Amazon SQS: Message queuing
+- API Gateway: REST API creation
+- CloudFront: CDN
+- Route 53: DNS management
+- App Runner: Container deployment
+
+### Microsoft Azure
+- Azure OpenAI Service
+- Azure ML
+- Azure Functions
+- Azure Cognitive Services
+
+### Google Cloud Platform (GCP)
+- Vertex AI
+- Cloud Functions
+- Cloud Storage
+
+### Infrastructure & DevOps
+- Docker: Containerization, multi-stage builds
+- Terraform: Infrastructure as Code
+- GitHub Actions: CI/CD pipelines
+- MLflow: Experiment tracking, model registry
+- Weights & Biases: Experiment tracking
+
+### Deployment Platforms
+- Vercel: Frontend and serverless deployment
+- HuggingFace Spaces: ML model demos
+- Gradio: Interactive interfaces
+
+## Specialization Areas
+
+### Computer Vision
+- Object detection (YOLO family)
+- Image classification
+- Instance segmentation (Mask R-CNN)
+- Semantic segmentation (U-Net)
+- Image preprocessing and augmentation
+- Transfer learning for vision tasks
+
+### Medical Image Analysis
+- Histopathological image processing
+- Cell segmentation algorithms
+- Color quantization techniques
+- DBSCAN clustering for cell detection
+- Disease diagnosis applications
+
+### Deep Learning
+- Convolutional Neural Networks (CNNs)
+- Recurrent Neural Networks (RNNs, LSTM, GRU)
+- Transformers and attention mechanisms
+- Autoencoders
+- Generative models
+
+### Natural Language Processing
+- Text classification
+- Named Entity Recognition (NER)
+- Sentiment analysis
+- Text generation
+- Question answering systems
+- Document summarization
+
+### Explainable AI (XAI)
+- Model interpretability techniques
+- SHAP values
+- LIME explanations
+- Attention visualization
+- Feature importance analysis
+- Currently studying: Actionable Interpretable Methods (PhD course)
+
+================================================================================
+SECTION 5: PROFESSIONAL EXPERIENCE - DETAILED
+================================================================================
+
+## 1. Graduate Teaching Assistant - NLP
+Organization: Northeastern University, Khoury College of Computer Sciences
+Location: Boston, MA, USA
+Duration: January 2026 - Present
+Supervisor: Professor Amir Tahmasebi
+Course: Natural Language Processing (Graduate Level)
+
+### Responsibilities:
+- Conducting weekly lab practical sessions for graduate students
+- Teaching PyTorch implementation for NLP tasks
+- Walking through ML and Deep Learning code examples
+- Demonstrating neural network architectures (RNNs, LSTMs, Transformers)
+- Guiding students through NLP pipeline development
+- Creating supplementary learning materials
+- Holding office hours for student support
+- Grading assignments and providing detailed feedback
+
+### Skills Demonstrated:
+- Technical expertise in PyTorch and deep learning
+- Communication and teaching abilities
+- Code review and debugging
+- Curriculum development support
+
+### Selection Process:
+- Selected without having taken the NLP course
+- Based on exceptional performance in Foundations of AI (99/100)
+- Recognized for strong teaching potential and technical skills
+
+---
+
+## 2. Researcher & Research Mentor
+Organization: Jadavpur University, Kolkata, India
+Department: Computer Science and Engineering
+Location: Kolkata, India
+Duration: March 2024 - May 2025
+Supervisors: Dr. Kaushiki Roy, Dr. Debotosh Bhattacharjee
+
+### Project: Cell Segmentation in Histopathological Images
+Focus: Developing custom ML pipelines for automated cell segmentation in medical imaging
+
+### Technical Work:
+- Designed custom machine learning pipelines for histopathological cell segmentation
+- Implemented preprocessing techniques:
+  - Color quantization for consistent cell appearance
+  - DBSCAN clustering for identifying densely packed cells
+  - Morphological operations for cell boundary refinement
+- Combined classical computer vision techniques with deep learning approaches
+- Worked with multiple cell line datasets
+- Developed algorithms for handling complex cellular structures
+
+### Research Contributions:
+- Created novel preprocessing pipeline for medical images
+- Implemented segmentation techniques for challenging densely packed cell scenarios
+- Contributed to framework development for cell colony segmentation
+
+### Mentorship Role:
+- Guided junior researchers in deep learning techniques
+- Conducted literature review sessions
+- Helped team members understand medical imaging fundamentals
+- Shared knowledge on model implementation and evaluation
+
+### Letters of Recommendation:
+- Received strong recommendation from Dr. Debotosh Bhattacharjee (Professor)
+- Recognized for strong fundamental concepts and quick learning of cutting-edge AI skills
+
+---
+
+## 3. Research Intern
+Organization: North-Eastern Hill University (NEHU)
+Location: Remote
+Duration: February 2023 - July 2023
+Supervisor: Dr. Arnab Kumar Maji
+Focus: Indian Sign Language Recognition
+
+### Project Contributions:
+- Conducted extensive literature survey on sign language recognition systems
+- Analyzed existing datasets:
+  - Microsoft ASL dataset
+  - MNIST Sign Language dataset
+  - Static ISL (Indian Sign Language) dataset
+- Identified key characteristics that define high-quality sign language datasets
+- Advised team on best practices for data collection and annotation
+- Contributed to development of Indian Sign Language dataset
+- Built and tested models using various public datasets
+
+### Technical Skills Applied:
+- Computer vision for gesture recognition
+- Dataset analysis and quality assessment
+- Deep learning model implementation
+- Research methodology
+
+---
+
+## 4. Industrial Trainee
+Organization: Novotel Kolkata (Accor Hotels)
+Location: Kolkata, India
+Duration: December 2022 - January 2023
+Department: Information Technology
+
+### Responsibilities:
+- Facilitated IT system migration from local servers to Oracle cloud infrastructure
+- Supported IT operations for 1000+ hotel rooms
+- Resolved server issues in coordination with Oracle's technical teams
+- Managed on-premises PBX (Private Branch Exchange) systems
+- Supported Windows-based systems running Oracle OPERA (hotel management software)
+- Assisted with cloud migrations for departmental IT infrastructure
+
+### Technical Experience Gained:
+- Cloud migration processes
+- Oracle cloud infrastructure
+- Enterprise database management (Oracle)
+- Network administration
+- PBX system management
+- Windows Server administration
+- IT support in hospitality industry
+
+---
+
+## 5. Volunteer Educator & Mentor
+Organization: The Hope Foundation
+Location: Kolkata, India
+Duration: 2006 - May 2025 (19 years)
+Role: Educational Content Developer, Teacher, Community Organizer
+
+### Teaching Activities:
+- Taught mathematics and computer science to underprivileged students
+- Worked with 10+ students over 7+ years of consistent teaching
+- Developed custom learning materials tailored to student needs
+- Created structured lesson plans breaking complex topics into manageable concepts
+- Mentored students beyond academics - confidence building, career guidance
+
+### Educational Content Development:
+- Designed educational materials for children
+- Created storybooks teaching moral values and life skills
+- Developed visual aids for concept explanation
+
+### COVID-19 Relief Efforts (2020-2021):
+- Coordinated essential supplies delivery to vulnerable communities
+- Organized and managed volunteer teams
+- Managed oxygen cylinder distribution during critical shortage
+- Worked with local authorities for community safety and cleanliness
+- Handled logistics for food and medical supply distribution
+
+### Strategic Contributions:
+- Suggested education and skill development programs over temporary relief measures
+- Observed successful trickle-down effect of education investments
+- Young adults trained through programs secured stable employment
+
+### Impact:
+- Helped break cycles of poverty through education
+- Witnessed transformation of students gaining confidence and employment
+- Contributed to community resilience during pandemic
+
+---
+
+## 6. Peer Tutor
+Organization: Institute of Engineering and Management (IEM)
+Location: Kolkata, India
+Duration: 2020 - 2024 (Throughout undergraduate studies)
+
+### Activities:
+- Led Data Structures & Algorithms study groups
+- Assisted 30+ peers with programming in Python, C++, and Java
+- Helped classmates with debugging and problem-solving
+- Explained complex concepts in accessible ways
+- Organized informal tutoring sessions before exams
+
+================================================================================
+SECTION 6: RESEARCH PROJECTS & PUBLICATIONS - DETAILED
+================================================================================
+
+## Published Work
+
+### 1. Intelligent Traffic Sign Detection System
+**Status:** Published at AISC 2024 (Artificial Intelligence and Soft Computing Conference)
+**Publisher:** Springer's "Information and Communication Technologies" series
+**Co-authors:** Research team at IEM Kolkata
+
+#### Problem Statement:
+Traffic sign detection systems trained on Western datasets (like Berkeley Driving Dataset) perform poorly on Indian roads due to:
+- Cluttered backgrounds
+- Different sign designs
+- Varied lighting conditions
+- Occlusion from vehicles and pedestrians
+- Diverse road conditions
+
+#### Technical Approach:
+1. **Base Detection:** Used YOLOv8 for initial object detection
+2. **Custom CNN Filter:** Developed additional CNN layer to filter false positives
+3. **Two-stage Training:**
+   - First trained CNN on Berkeley Driving Dataset
+   - Re-trained on IIIT Hyderabad Indian Driving Dataset
+4. **Joint Detection-Filtering Pipeline:** Combined YOLO detection with CNN filtering
+
+#### Key Innovations:
+- Addressed region-specific challenges in traffic sign detection
+- Created hybrid architecture combining YOLO and CNN
+- Achieved significant accuracy improvement for Indian road conditions
+- Reduced false positives in cluttered environments
+
+#### Datasets Used:
+- Berkeley Driving Dataset (BDD100K)
+- IIIT Hyderabad Indian Driving Dataset
+
+#### Results:
+- Improved detection accuracy for Indian road conditions
+- Robust performance in cluttered environments
+- Demonstrated importance of region-specific model adaptation
+
+---
+
+## In Progress Research
+
+### 2. Cell Segmentation Pipeline for Histopathological Images
+**Status:** Research completed, paper preparation in progress
+**Institution:** Jadavpur University
+**Supervisors:** Dr. Kaushiki Roy, Dr. Debotosh Bhattacharjee
+
+#### Problem Statement:
+Automated cell segmentation in histopathological images is challenging due to:
+- Densely packed cell colonies
+- Overlapping cell boundaries
+- Variable cell sizes and shapes
+- Staining variations
+- Complex tissue backgrounds
+
+#### Technical Approach:
+1. **Preprocessing Pipeline:**
+   - Color quantization to normalize staining variations
+   - Contrast enhancement for cell boundary visibility
+   
+2. **Clustering for Cell Detection:**
+   - DBSCAN (Density-Based Spatial Clustering) for identifying cell clusters
+   - Handles arbitrary-shaped cell groups
+   - Robust to noise and outliers
+
+3. **Segmentation:**
+   - Combined classical CV techniques with deep learning
+   - Custom pipeline for densely packed cells
+   - Morphological operations for boundary refinement
+
+#### Applications:
+- Disease diagnosis assistance
+- Cell counting automation
+- Treatment response monitoring (rising/falling cell counts)
+- Pathology workflow enhancement
+
+#### Technical Details:
+- Implemented in Python with OpenCV and PyTorch
+- Tested on multiple cell line datasets
+- Focused on confluent cellular colonies
+
+---
+
+## Under Development
+
+### 3. Hybrid Network Intrusion Detection System
+**Status:** Under Development
+**Patent Status:** Patent Pending (Filed through SRM University, Chennai)
+
+#### Problem Statement:
+Traditional intrusion detection systems inspect network traffic on a per-node basis, missing:
+- Coordinated attacks across multiple nodes
+- Subtle behavioral patterns
+- Advanced persistent threats
+- Distributed denial-of-service (DDoS) patterns
+
+#### Technical Approach:
+1. **Network-Wide Behavioral Analysis:**
+   - Holistic view of network traffic patterns
+   - Cross-node correlation detection
+   - Temporal pattern analysis
+
+2. **Hybrid Deep Learning Architecture:**
+   - Integration of multiple DL architectures
+   - CNN for spatial pattern detection
+   - RNN/LSTM for temporal sequence analysis
+   - Attention mechanisms for feature importance
+
+3. **Threat Detection Capabilities:**
+   - Coordinated attack detection
+   - Anomaly identification
+   - Real-time monitoring
+
+#### Innovation:
+- Goes beyond traditional per-node inspection
+- Detects threats invisible to conventional methods
+- Patent pending for novel approach
+
+================================================================================
+SECTION 7: LLM & AGENT PROJECTS - FROM COURSES
+================================================================================
+
+## Project 1: AI-Powered Brochure Generator
+**Course:** AI Engineer Core Track (Ed Donner)
+**Technologies:** LangChain, OpenAI API, Web Scraping
+
+### Description:
+Built an intelligent system that automatically generates marketing brochures by:
+- Scraping and navigating company websites
+- Extracting relevant information intelligently
+- Generating professional brochure content
+- Adapting tone and style to company branding
+
+### Technical Implementation:
+- Web scraping with BeautifulSoup/Selenium
+- LLM-powered content extraction
+- Prompt engineering for style matching
+- Automated layout generation
+
+---
+
+## Project 2: Multi-Modal Customer Support Agent
+**Course:** AI Engineer Core Track
+**Technologies:** OpenAI API, Function Calling, Gradio UI
+
+### Description:
+Developed a customer support agent for an airline with:
+- Multi-modal input handling (text, images)
+- Function calling for real-time data access
+- Interactive user interface
+- Context-aware responses
+
+### Technical Features:
+- Tool/function integration
+- Conversation memory
+- Error handling and fallbacks
+- Professional UI with Gradio
+
+---
+
+## Project 3: Meeting Minutes Generator
+**Course:** AI Engineer Core Track
+**Technologies:** Whisper, OpenAI API, Open-source LLMs
+
+### Description:
+Tool that processes audio recordings to:
+- Transcribe meeting audio
+- Identify speakers
+- Extract key discussion points
+- Generate action items automatically
+- Create structured meeting summaries
+
+### Technical Approach:
+- Audio processing with Whisper
+- Comparison of closed-source vs open-source models
+- Structured output generation
+- Action item extraction with NLP
+
+---
+
+## Project 4: Python to C++ Code Optimizer
+**Course:** AI Engineer Core Track
+**Technologies:** LLMs, Code Generation, Performance Analysis
+
+### Description:
+AI system that converts Python code to optimized C++:
+- Analyzes Python code structure
+- Generates equivalent C++ code
+- Optimizes for performance
+- Achieved up to 60,000x performance improvement
+
+### Applications:
+- Performance-critical applications
+- Legacy code optimization
+- Cross-language development
+
+---
+
+## Project 5: Enterprise RAG Knowledge Worker
+**Course:** AI Engineer Core Track
+**Technologies:** LangChain, ChromaDB, OpenAI Embeddings, Gradio
+
+### Description:
+Built a RAG-based system that becomes an expert on company-related matters:
+- Document ingestion and chunking
+- Vector embedding and storage
+- Semantic search for relevant context
+- Answer generation with source citations
+
+### Technical Implementation:
+- Document loaders for multiple formats (PDF, DOCX, TXT)
+- Recursive text splitting with overlap
+- ChromaDB for vector storage
+- Gradio interface for Q&A
+- Source attribution for transparency
+
+### Features:
+- Interactive Q&A system
+- Source citation display
+- Confidence scoring
+- Multi-document support
+
+---
+
+## Project 6: Product Price Prediction (Frontier Models)
+**Course:** AI Engineer Core Track - Capstone Part A
+**Technologies:** GPT-4, Claude, Prompt Engineering
+
+### Description:
+Predict product prices from short text descriptions using frontier LLMs:
+- Prompt engineering for price estimation
+- Comparison across different models
+- Evaluation metrics for price prediction
+- Error analysis and improvement
+
+---
+
+## Project 7: Fine-Tuned Price Prediction Model
+**Course:** AI Engineer Core Track - Capstone Part B
+**Technologies:** QLoRA, Hugging Face, Open-source LLMs
+
+### Description:
+Fine-tuned open-source model to compete with frontier models:
+- Dataset preparation for price prediction
+- QLoRA fine-tuning implementation
+- Model evaluation and comparison
+- Cost-effectiveness analysis
+
+### Technical Details:
+- Parameter-efficient fine-tuning with QLoRA
+- Hugging Face TRL and SFTTrainer
+- Model quantization for efficiency
+- Benchmark against GPT-4/Claude
+
+---
+
+## Project 8: Multi-Agent Trading System
+**Course:** AI Engineer Core Track - Capstone Part C + Agentic Track
+**Technologies:** CrewAI, AutoGen, MCP, Multiple LLMs
+
+### Description:
+Autonomous trading floor with 4 AI agents:
+- Market analysis agent
+- Risk assessment agent
+- Trade execution agent
+- Portfolio management agent
+
+### Technical Architecture:
+- 6 MCP servers for tool integration
+- 44+ tools for market data, analysis, execution
+- Multi-agent collaboration
+- Real-time deal detection and alerts
+
+### Features:
+- Autonomous decision-making
+- Inter-agent communication
+- Special bargain notification
+- Risk management protocols
+
+---
+
+## Project 9: Career Digital Twin
+**Course:** AI Engineer Agentic Track
+**Technologies:** OpenAI Agents SDK, LangGraph
+
+### Description:
+Built and deployed an AI agent that represents you to potential employers:
+- Answers questions about skills and experience
+- Provides portfolio information
+- Handles recruiter inquiries
+- Maintains professional persona
+
+---
+
+## Project 10: SDR (Sales Development Representative) Agent
+**Course:** AI Engineer Agentic Track
+**Technologies:** CrewAI, Email Integration
+
+### Description:
+Sales representatives that craft and send professional emails:
+- Lead research and qualification
+- Personalized email generation
+- Follow-up scheduling
+- Response tracking
+
+---
+
+## Project 11: Deep Research Agent
+**Course:** AI Engineer Agentic Track
+**Technologies:** Multi-agent system, Web Search
+
+### Description:
+Team of agents that carry out extensive research:
+- Query understanding agent
+- Web search agent
+- Information synthesis agent
+- Report generation agent
+
+### Features:
+- Comprehensive topic coverage
+- Source verification
+- Structured report output
+- Citation management
+
+---
+
+## Project 12: Stock Picker Agent
+**Course:** AI Engineer Agentic Track
+**Technologies:** CrewAI, Financial APIs
+
+### Description:
+Automated search for investment opportunities:
+- Market screening
+- Fundamental analysis
+- Technical indicators
+- Recommendation generation
+
+---
+
+## Project 13: 4-Agent Engineering Team
+**Course:** AI Engineer Agentic Track
+**Technologies:** CrewAI, Docker, Code Agents
+
+### Description:
+Software development team with 4 specialized agents:
+- Project Manager Agent: Task breakdown, prioritization
+- Developer Agent: Code generation
+- Tester Agent: Test creation and execution
+- DevOps Agent: Deployment and monitoring
+
+### Features:
+- End-to-end software development
+- Docker-based execution
+- Code review and iteration
+- Automated testing
+
+---
+
+## Project 14: Browser Automation Agent (Operator Clone)
+**Course:** AI Engineer Agentic Track
+**Technologies:** LangGraph, Browser Automation
+
+### Description:
+AI sidekick that works inside browser:
+- Web navigation
+- Form filling
+- Data extraction
+- Task automation
+
+---
+
+## Project 15: Agent Creator
+**Course:** AI Engineer Agentic Track
+**Technologies:** AutoGen, Dynamic Agent Generation
+
+### Description:
+Meta-agent that builds and launches new agents:
+- Requirement analysis
+- Agent specification
+- Code generation for agents
+- Deployment automation
+
+---
+
+## MLOps Deployment Projects
+
+### AWS Deployment
+- Deployed SaaS LLM apps to production
+- Used Lambda, S3, CloudFront, SQS, Route 53, App Runner, API Gateway
+- Integrated Amazon Bedrock and SageMaker
+- Implemented with Terraform and GitHub Actions CI/CD
+
+### Multi-Cloud Architecture
+- AWS, Azure, GCP, Vercel deployment experience
+- Enterprise-grade security and monitoring
+- Guardrails implementation
+- Observability and explainability
+
+================================================================================
+SECTION 8: ONLINE COURSES & CERTIFICATIONS - DETAILED
+================================================================================
+
+## AI Engineering Courses (Completed January 2026)
+
+### 1. AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents
+- Platform: Udemy
+- Instructor: Ed Donner (20+ years AI experience, co-founded AI startup)
+- Duration: 33.5 hours
+- Rating: 4.7/5 (190,768 learners)
+- Certificate: https://www.udemy.com/certificate/UC-6da190e8-0ec9-4582-b1f9-a3d6e7ef9fd0/
+
+#### Topics Mastered:
+- 8 real-world LLM projects
+- RAG (Retrieval-Augmented Generation) pipelines
+- QLoRA fine-tuning techniques
+- AI Agents development
+- Multi-modal applications
+- Frontier models (GPT-4, Claude) vs Open-source (Llama, Mistral)
+- HuggingFace ecosystem
+- LangChain framework
+- Gradio interfaces
+- Python to C++ optimization (60,000x performance)
+
+#### Projects Completed:
+1. AI-powered brochure generator
+2. Multi-modal customer support agent
+3. Meeting minutes generator
+4. Code optimizer (Python to C++)
+5. RAG knowledge worker
+6. Price prediction (frontier models)
+7. Fine-tuned price prediction
+8. Multi-agent trading system
+
+---
+
+### 2. AI Engineer Agentic Track: The Complete Agent & MCP Course
+- Platform: Udemy
+- Duration: 17 hours
+- Rating: 4.7/5 (191,004 learners)
+- Certificate: https://www.udemy.com/certificate/UC-a96b7f21-f370-4bf6-b298-68afbf573acb/
+
+#### Topics Mastered:
+- OpenAI Agents SDK
+- CrewAI framework
+- LangGraph for agent orchestration
+- AutoGen for conversational agents
+- MCP (Model Context Protocol)
+- Multi-agent collaboration
+- Tool integration
+
+#### Projects Completed:
+1. Career Digital Twin
+2. SDR Agent
+3. Deep Research Agent
+4. Stock Picker Agent
+5. 4-Agent Engineering Team
+6. Browser Automation Agent
+7. Agent Creator
+8. Trading Floor (4 agents, 6 MCP servers, 44 tools)
+
+---
+
+### 3. AI Engineer MLOps Track: Deploy Gen AI & Agentic AI at Scale
+- Platform: Udemy
+- Duration: 18.5 hours
+- Rating: 4.7/5 (23,179 learners)
+- Certificate: Available
+
+#### Topics Mastered:
+- Production deployment on AWS, GCP, Azure, Vercel
+- Amazon Bedrock and SageMaker
+- AWS services: Lambda, S3, CloudFront, SQS, Route 53, App Runner, API Gateway
+- Terraform for Infrastructure as Code
+- GitHub Actions for CI/CD
+- Multi-Agent systems with Amazon Bedrock AgentCore
+- Enterprise-grade AI solutions
+- Security, monitoring, observability
+- Guardrails implementation
+- Dev/Test/Prod environments
+
+---
+
+## Deep Learning & ML Certifications
+
+### 4. Deep Learning A-Z 2024: Neural Networks, AI & ChatGPT
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-17f58812-6746-49db-9f1b-55288d0f4cc8/
+- Topics: Neural networks, CNNs, RNNs, autoencoders, self-organizing maps
+
+### 5. Machine Learning: NLP in Python V2
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-82fb2982-1ef2-4612-8dce-85c6247f18d7/
+- Topics: Text processing, sentiment analysis, topic modeling, word embeddings
+
+### 6. Python for ML & Data Science Masterclass
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-057b3f62-2d2f-4ac8-88b7-4bb3ac32099e/
+- Topics: NumPy, Pandas, Matplotlib, Seaborn, scikit-learn
+
+---
+
+## Programming & Algorithms Certifications
+
+### 7. Data Structures & Algorithms C++: Zero to Mastery
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-d732f376-d464-4c4e-85cc-fcf11e7216f8/
+- Topics: Arrays, linked lists, trees, graphs, dynamic programming, sorting
+
+### 8. C++ Programming - Beginner to Beyond
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-fedcd3f8-b13a-4412-acaf-4c56a217f4fe/
+- Topics: OOP, STL, memory management, modern C++
+
+### 9. Python Mega Course: 10 Real World Applications
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-617c5251-b8a5-49d9-994c-1e0fcbd3b014/
+- Topics: Web apps, data visualization, automation, GUI development
+
+### 10. Web Developer Bootcamp 2024
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-36eb85e9-6d9f-4648-95f3-f10a7f27e380/
+- Topics: HTML, CSS, JavaScript, Node.js, React, MongoDB
+
+---
+
+## Specialized Skills Certifications
+
+### 11. High-Performance Computing with Python 3x
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-7a1d8574-7ee2-4c0a-9ed7-6b2b6e157270/
+- Topics: Parallel processing, multiprocessing, optimization, performance profiling
+
+### 12. Investing in Stocks Complete Course
+- Platform: Udemy
+- Certificate: https://www.udemy.com/certificate/UC-49132f6d-e26a-4b6c-b43b-9e0d57b234b2/
+- Duration: 17+ hours
+- Topics: Fundamental analysis, financial statements, valuation, portfolio management
+
+================================================================================
+SECTION 9: COMPETITIVE PROGRAMMING & CODING ACHIEVEMENTS
+================================================================================
+
+## CodeChef
+- Profile: https://www.codechef.com/users/a_ghosh
+- Rating: 4-Star (1911)
+- Achievements:
+  - Consistent participation in monthly contests
+  - Strong algorithmic problem-solving
+  - Focus on optimization and efficiency
+
+## HackerRank
+- Profile: https://www.hackerrank.com/profile/aniket_ghosh
+- Achievements: 5 Stars (Highest Level) in multiple domains
+
+### Domain-wise Ratings:
+1. Problem Solving: 5 Stars
+   - Algorithm implementation
+   - Data structure optimization
+   - Complex problem decomposition
+
+2. C++: 5 Stars
+   - STL mastery
+   - Memory-efficient solutions
+   - Template programming
+
+3. Python: 5 Stars
+   - Pythonic solutions
+   - Library utilization
+   - Clean code practices
+
+4. Java: 5 Stars
+   - OOP implementation
+   - Collection framework
+   - Stream API
+
+5. C: 5 Stars
+   - Low-level programming
+   - Pointer manipulation
+   - Memory management
+
+## Competitive Programming Philosophy:
+- Focus on understanding problems deeply before coding
+- Emphasis on optimal time and space complexity
+- Learning from contest problems for skill improvement
+- Regular practice to maintain proficiency
+
+================================================================================
+SECTION 10: HARDWARE & SYSTEMS EXPERIENCE
+================================================================================
+
+## Operating Systems Expertise
+
+### Windows (Expert)
+- All versions including LTSC, LTSB, Windows Server 2021
+- System optimization and performance tuning
+- De-stripped unnecessary services
+- Improved performance benchmarks (Superposition, Heaven)
+- Registry optimization
+- Group policy management
+
+### Linux (Expert)
+- **Ubuntu (Primary):** Used for all research work, ML development
+  - Research at Jadavpur University conducted on Ubuntu
+  - Mask R-CNN and deep learning library compatibility
+- **Kali Linux:** Security testing and penetration testing experiments
+- **Arch Linux:** System customization and learning
+- **Linux Mint:** General productivity
+- **Tails OS:** Privacy and security experiments
+- **Qubes OS:** Security compartmentalization
+- **NetHunter:** Mobile security testing
+
+### macOS (Expert)
+- Primary device for productivity
+- Academic notes and presentations
+- Document preparation
+- General workflow
+
+### Other Systems
+- DOS: Historical understanding and experimentation
+- Raspberry Pi OS: IoT experiments
+- Arduino (Debian): Hardware automation projects
+
+## Custom Computer Builds
+
+### First Computer (Age 12)
+- Self-funded through savings
+- Purchased components individually from local markets
+- Spent countless hours troubleshooting hardware issues
+- Transformative learning experience in patience and problem-solving
+- Sparked passion for technology
+
+### Current Workstation Setup
+- Hand-built AI research workstation
+- Triple-boot configuration:
+  1. Windows LTSC/LTSB: Gaming and resource-intensive tasks
+  2. Windows Professional: Stable environment for general applications
+  3. Ubuntu: ML development and research
+
+### Hardware Experience:
+- Component selection and compatibility
+- BIOS configuration
+- Overclocking (CPU, GPU, RAM)
+- Thermal management
+- Benchmark testing and optimization
+
+## Server Management Experience
+
+### Novotel Kolkata IT Infrastructure
+- Managed on-premises PBX systems for 1,000+ rooms
+- Windows Server administration
+- Oracle OPERA hotel management system
+- Cloud migration to Oracle Cloud
+- Database management
+- Network infrastructure support
+
+## Devices Portfolio
+
+### Primary Devices:
+- Apple MacBook Air M1: Productivity, presentations, notes
+- Custom-built Windows/Linux workstation: AI research, development
+- Android devices (rooted): Development and security testing
+
+### Development Hardware:
+- Raspberry Pi: IoT experiments, edge computing tests
+- Arduino: Hardware automation prototyping
+
+================================================================================
+SECTION 11: COMMUNITY SERVICE & VOLUNTEER WORK - DETAILED
+================================================================================
+
+## The Hope Foundation
+**Location:** Kolkata, India
+**Duration:** 2006 - May 2025 (19+ years)
+**Roles:** Volunteer Educator, Content Developer, Community Organizer
+
+### Educational Initiative
+
+#### Teaching Activities (2006-2025):
+- Taught mathematics and computer science to underprivileged students
+- Worked consistently with 10+ students over 7 years
+- Students ranged from elementary to high school age
+- Focus areas: Basic mathematics, algebra, computer basics, programming fundamentals
+
+#### Teaching Philosophy:
+- Break complex topics into manageable concepts
+- Build confidence alongside knowledge
+- Personalized attention to individual learning needs
+- Mentorship beyond academics - career guidance, life skills
+
+#### Educational Materials Development:
+- Created custom storybooks for children
+- Developed visual aids for concept explanation
+- Designed worksheets and practice materials
+- Materials focused on moral values and practical life skills
+
+### Strategic Impact
+
+#### Resource Allocation Recommendations:
+- Suggested prioritizing education and skill development over temporary relief
+- Advocated for sustainable change through empowerment
+- Recommended vocational training programs
+
+#### Observed Outcomes:
+- Young adults trained through programs secured stable employment
+- Trickle-down effect on families and neighbors
+- Breaking cycles of poverty through education
+- Community empowerment through skill development
+
+### COVID-19 Relief Operations (2020-2021)
+
+#### Crisis Response:
+- Mother hospitalized with COVID-19 during pandemic
+- Witnessed urgent community needs firsthand
+
+#### Relief Coordination:
+- Organized volunteer teams for essential supplies distribution
+- Managed logistics for food package delivery
+- Coordinated oxygen cylinder distribution during critical shortage
+- Worked with local authorities for safety protocols
+
+#### Community Support:
+- Helped elderly neighbors access essential services
+- Grocery delivery coordination
+- Medical supply distribution
+- Safety and cleanliness coordination with authorities
+
+### Personal Growth from Service:
+- Developed leadership and organizational skills
+- Understanding of grassroots community needs
+- Appreciation for sustainable vs temporary solutions
+- Commitment to using technology for social good
+
+================================================================================
+SECTION 12: PERSONAL BACKGROUND & LIFE STORY
+================================================================================
+
+## Family Background
+
+### Father: Dhruba Jyoti Ghosh
+- Profession: SAP Consultant for IBM
+- Work locations: Chicago (USA), Bonn (Germany), Zurich (Switzerland)
+- Influence: Exposed Aniket to international cultures and developed nations
+- Lesson learned: Technology enables global connectivity and impact
+
+### Mother: Social Worker
+- Dedication: Lifetime commitment to helping marginalized communities
+- Influence: Primary inspiration for community service
+- Lesson learned: Social justice is a call to action, not just an ideal
+- Quote inspiration: "She taught me that social justice is not at all an ideal but a call to action"
+
+## Formative Experiences
+
+### Contrast of Worlds:
+- Traveled to Chicago, Bonn, Zurich with father
+- Witnessed unlimited education, healthcare, infrastructure in developed nations
+- Simultaneously worked with mother in marginalized communities
+- Observed children lacking basic resources and opportunities
+- This contrast shaped worldview and sparked desire to bridge opportunity gaps
+
+### First Computer Build (Age 12):
+- Saved money over months to buy components
+- Purchased motherboard, graphics card, and parts from local markets
+- Spent countless hours troubleshooting hardware issues
+- Moment of first successful boot was transformative
+
+#### Lessons Learned:
+- Patience and persistence pay off
+- Problems can be overcome with determination
+- Technology can create something from nothing
+- Technology is a "great equalizer" - provides equal access to anyone willing to learn
+
+### Mother's Community Work Involvement:
+- Participated since 2006 (age ~8)
+- Observed resource allocation debates
+- Suggested education focus over temporary measures
+- Witnessed successful outcomes of strategic investments
+- Learned that small, thoughtful actions create lasting impact
+
+## Investment Journey
+
+### Beginning:
+- Started investing out of curiosity about how companies work
+- Goal: Understand why some companies succeed while others fail
+- Approach: Fundamental analysis, not speculation
+
+### Performance:
+- Achieved consistent 40-85% annual returns over 5 years
+- Through fundamental analysis and industry understanding
+- Not just analyzing numbers, but understanding business models
+
+### Influences:
+- Nikhil Kamath: Indian investor and entrepreneur
+- Reid Hoffman: LinkedIn founder, technology investing
+- Sam Altman: Y Combinator, AI industry leadership
+- Bill Gates: Philanthropy and technology impact
+
+### Learning Resources:
+- Y Combinator: Startup ecosystem understanding
+- Harvard Business Review: Business strategy and management
+- a16z Podcast: Technology trends and venture capital
+
+### Philosophy on Finance:
+- "Finance is the power behind ideas"
+- Finance enables scaling solutions for social impact
+- Understanding financial systems provides tools for greater impact
+- Investment as a means of supporting innovation
+
+## COVID-19 Impact (2020-2021)
+
+### Academic Resilience:
+- Campus shutdown disrupted normal learning
+- Used free time for intensive online learning
+- Focused on programming, AI, and machine learning
+- Maintained GPA above 9.0
+- Achieved 4-star rating on CodeChef during this period
+
+### Personal Challenge:
+- Mother hospitalized with COVID-19
+- Witnessed her struggle and community's urgent needs
+- Elderly neighbors struggling for basic services
+- Critical shortage of oxygen cylinders
+
+### Response:
+- Organized community task force
+- Coordinated logistics for essential supplies
+- Arranged deliveries to vulnerable neighbors
+- Worked with local authorities
+
+### Growth:
+- Learned resilience and adaptability
+- Reinforced commitment to meaningful impact
+- Developed leadership in crisis situations
+- Strengthened resolve for using skills for social good
+
+================================================================================
+SECTION 13: CAREER ASPIRATIONS & GOALS
+================================================================================
+
+## Current Focus (2025-2027)
+
+### Academic Goals:
+- Excel in MS AI program at Northeastern University
+- Maintain high GPA in advanced courses
+- Complete PhD-level course in Actionable Interpretable Methods
+- Build expertise in explainable AI
+
+### Teaching Goals:
+- Succeed as TA for graduate NLP course
+- Develop teaching and communication skills
+- Help students understand complex ML/DL concepts
+- Create supplementary learning materials
+
+### Technical Skill Development:
+- Master production-ready AI systems (RAG, Agents, MLOps)
+- Deepen expertise in LLM engineering
+- Build strong cloud deployment capabilities
+- Develop end-to-end ML pipeline skills
+
+## Short-term Goals (1-3 years)
+
+### Industry Experience:
+- Secure AI/ML engineering internship or co-op
+- Apply academic knowledge to real-world problems
+- Gain experience in production ML systems
+- Build professional network in AI industry
+
+### Research:
+- Publish cell segmentation research
+- Explore interpretable ML research opportunities
+- Apply AI to healthcare challenges
+
+### Project Portfolio:
+- Build impressive portfolio of AI projects
+- Open-source contributions
+- Demonstrate end-to-end capabilities
+
+## Long-term Vision (5+ years)
+
+### Impact Areas:
+
+#### Healthcare AI:
+- AI-driven diagnostics to expand healthcare access
+- Medical image analysis for disease detection
+- Accessible healthcare technology for underserved communities
+- Treatment monitoring and prediction systems
+
+#### Financial Technology:
+- Financial systems that empower informed decision-making
+- Democratize access to financial tools
+- AI for investment analysis
+- Financial literacy tools
+
+### Career Paths Considered:
+
+#### Research Track:
+- AI research scientist
+- Focus on healthcare or interpretable AI
+- Academic or industry research lab
+- Publications and patents
+
+#### Industry Track:
+- AI/ML Engineer at tech company
+- Lead AI initiatives
+- Build production AI systems
+- Scale solutions to millions of users
+
+#### Entrepreneurship Track:
+- Found AI startup for social good
+- Focus on healthcare or education technology
+- Apply technical skills to solve real problems
+- Create sustainable business with positive impact
+
+## Target Industries:
+1. Healthcare AI / Medical Technology
+2. Financial Technology (FinTech)
+3. Medical Imaging / Computational Biology
+4. EdTech (Educational Technology)
+
+## Guiding Philosophy:
+- "Fix what seems unfixable"
+- Technology as a great equalizer
+- Finance as power behind scaling ideas
+- Education breaks cycles of poverty
+- Resilience, resourcefulness, and strategic thinking turn challenges into opportunities
+
+================================================================================
+SECTION 14: INTERESTS & HOBBIES
+================================================================================
+
+## Stock Market & Investing
+- Active investor with 5+ years experience
+- Focus on fundamental analysis
+- Enjoys clear feedback loop of investment decisions
+- Studies company financials and industry trends
+- Achieved consistent 40-85% annual returns
+
+## Psychology
+- Fascinated by human behavior and decision-making
+- Interest in cognitive biases and heuristics
+- Understanding of consumer behavior
+- Application to product design and user experience
+
+## Management & Leadership
+- Studies great leaders and their principles
+- Interested in organizational behavior
+- Reads management literature and case studies
+- Leadership experience through volunteer work and peer tutoring
+
+## Swimming
+- Values underwater silence and meditation
+- Physical fitness activity
+- Stress relief and mental clarity
+
+## Cooking
+- Passionate about preparing food
+- Enjoys experimenting with recipes
+- Appreciation for different cuisines
+
+## Technology Exploration
+- Building and optimizing computer systems
+- Experimenting with different operating systems
+- Hardware tinkering and optimization
+- Staying updated with tech trends
+
+================================================================================
+SECTION 15: LETTERS OF RECOMMENDATION - SUMMARIES
+================================================================================
+
+## 1. Dr. Debotosh Bhattacharjee, Ph.D.
+**Position:** Professor, Department of Computer Science and Engineering
+**Institution:** Jadavpur University, Kolkata
+**Email:** debotosh.bhattacharjee@jadavpuruniversity.in
+**Date:** October 5, 2024
+
+### Relationship:
+- Supervised Aniket's research internship from March 2024
+- Project: "AI-assisted automated tool for segmenting cells from confluent cellular colonies"
+
+### Key Observations:
+- Strong knowledge of fundamental concepts
+- Provided inputs towards research
+- Quickly picked up cutting-edge AI skills
+- Aptitude for bioinformatics and computational biology
+- Breadth of knowledge from AI to medical imaging
+
+### Recommendation Strength:
+- "Ideal candidate" for AI/ML program
+- Capacity for excellent graduate work
+- Potential to make major contributions to AI research
+- Potential for significant contributions to AI in life sciences
+
+---
+
+## 2. Dr. Nirmal Das
+**Position:** Postdoctoral Fellow, Department of Computer Science
+**Institution:** University of Otago, New Zealand
+**Previous:** Assistant Professor at IEM, Kolkata
+**Email:** nirmal.das@otago.ac.nz
+
+### Relationship:
+- Taught Aniket in Data Structures & Algorithms and Operating Systems
+- Supervised medical image segmentation project for one year
+
+### Key Observations:
+- "Always a top performer in my class"
+- Good understanding of concepts with practical application ability
+- Organized problem-solving style
+- Often provided multiple efficient solutions to same problem
+- Analytical and creative approach
+- Critical thinker and team player
+- "Not only implementing my idea but also coming with his own"
+
+### Recommendation Strength:
+- "Strong recommendation" for MS program
+- Deserving candidate with good academic will
+- Research acumen and thirst for knowledge
+- "Clearly will do well in the PhD program"
+
+---
+
+## 3. Prof. Subhadip Chandra
+**Position:** Assistant Professor, Department of CSE (AIML)
+**Institution:** Institute of Engineering & Management, Kolkata
+**Email:** subhadipchandra@gmail.com
+**Experience:** 14+ years in teaching and research
+
+### Relationship:
+- Mentor during undergraduate studies
+- Observed throughout B.Tech program
+
+### Key Observations:
+- "Exceptional leadership qualities"
+- Always willing to speak up for peers
+- Ability to foster inclusion
+- Drive for group success, not personal attention
+- Impressive technical abilities
+
+### Specific Example - Traffic Sign Detection Project:
+- Showed initiative and problem-solving skills
+- Recognized dataset limitations (IIIT Hyderabad)
+- Sourced additional data from YouTube dashcam footage
+- Improved YOLOv8 with CNN models
+- One of the best projects in department
+- Led to research publication
+
+### Awards Mentioned:
+- Director's Award for Student Contribution
+- Academic achievements and positive campus impact
+
+### Recommendation Strength:
+- "Strongly recommend" for Master's program
+- "Recommend without reservation"
+- Ideal candidate combining technical acumen, leadership, and empathy
+- Will "excel and make meaningful contributions"
+
+================================================================================
+SECTION 16: FREQUENTLY ASKED QUESTIONS
+================================================================================
+
+## Academic Questions
+
+**Q: What is Aniket currently studying?**
+A: Aniket is pursuing an MS in Artificial Intelligence at Northeastern University's Khoury College of Computer Sciences, with a Machine Learning concentration. He started in Fall 2025 and expects to graduate in May 2027.
+
+**Q: What were Aniket's grades in his first semester?**
+A: Aniket scored 100/100 in Algorithms (under Prof. Mahsa Derakhshan) and 99/100 in Foundations of AI (under Prof. Amir Tahmasebi).
+
+**Q: What courses is Aniket taking now (Spring 2026)?**
+A: Aniket is taking:
+1. Applied Programming and Data Processing for AI (CS 5130) - under Bryan Wallace and Yu Jin
+2. Special Topics: Actionable Interpretable Methods - PhD-level course with special permission
+
+**Q: Why did Aniket get courses waived?**
+A: Mathematics for ML and Intro to ML/Pattern Recognition were waived due to his extensive prior experience from undergraduate studies and research work. He demonstrated proficiency through coursework, research, and certifications.
+
+**Q: Is Aniket a Teaching Assistant?**
+A: Yes, Aniket is a Graduate TA for the NLP (Natural Language Processing) course under Professor Amir Tahmasebi. He conducts lab sessions on PyTorch and ML/DL code walkthroughs. He was selected based on his exceptional performance (99/100) in Foundations of AI, without having taken the NLP course.
+
+**Q: What scholarship did Aniket receive?**
+A: Aniket was awarded a 15% departmental scholarship at Northeastern University for academic merit and research potential.
+
+**Q: What was Aniket's undergraduate GPA?**
+A: Aniket graduated with a 9.3/10 GPA (4.0/4.0 US equivalent as per WES evaluation) from IEM Kolkata, ranking 2nd in his department of 180+ students.
+
+---
+
+## Technical Skills Questions
+
+**Q: What programming languages does Aniket know?**
+A: Aniket is proficient in Python (expert), C/C++ (expert), Java (advanced), JavaScript (advanced), SQL (advanced), and HTML/CSS (advanced). He has 5-star ratings on HackerRank in Python, C++, Java, and C.
+
+**Q: What AI/ML frameworks does Aniket work with?**
+A: Aniket works with PyTorch, TensorFlow, Keras, scikit-learn, YOLOv8, Mask R-CNN, CNNs, Transformers, U-Net, and Hugging Face. He is currently teaching PyTorch as a TA.
+
+**Q: Does Aniket have LLM/GenAI experience?**
+A: Yes, Aniket has completed comprehensive courses on LLM engineering and has hands-on experience with:
+- RAG pipelines using LangChain and ChromaDB
+- LLM fine-tuning with LoRA/QLoRA
+- AI agents using OpenAI Agents SDK, CrewAI, AutoGen, LangGraph
+- MCP (Model Context Protocol)
+- OpenAI and Anthropic APIs
+- Prompt engineering
+
+**Q: What cloud platforms does Aniket know?**
+A: Aniket has experience with:
+- AWS: Bedrock, SageMaker, Lambda, S3, CloudFront, SQS, Route 53, App Runner, API Gateway
+- Azure: OpenAI Service, ML, Functions
+- GCP: Vertex AI, Cloud Functions
+- Vercel for frontend deployment
+
+**Q: Does Aniket have MLOps experience?**
+A: Yes, Aniket completed the MLOps track and has experience with Docker, Terraform (IaC), GitHub Actions (CI/CD), MLflow for experiment tracking, and deploying to multiple cloud platforms.
+
+---
+
+## Research Questions
+
+**Q: What research has Aniket published?**
+A: Aniket published a paper on "Intelligent Traffic Sign Detection System" at AISC 2024 (Springer's "Information and Communication Technologies" series). The paper presents a YOLOv8 + CNN hybrid approach for Indian road conditions.
+
+**Q: What research is Aniket currently working on?**
+A: Aniket worked on cell segmentation in histopathological images at Jadavpur University under Dr. Roy and Dr. Bhattacharjee. He developed custom ML pipelines using color quantization and DBSCAN clustering for densely packed cell detection.
+
+**Q: Does Aniket have any patents?**
+A: Aniket has a patent pending for a "Hybrid Network Intrusion Detection System" filed through SRM University, Chennai. The system uses network-wide behavioral analysis to detect coordinated threats.
+
+**Q: What are Aniket's research interests?**
+A: Aniket's research interests include Computer Vision, Deep Learning, Medical Image Analysis, Natural Language Processing, Explainable AI, and applying AI to healthcare and finance challenges.
+
+---
+
+## Experience Questions
+
+**Q: What industry experience does Aniket have?**
+A: Aniket's industry experience includes:
+- Graduate TA for NLP at Northeastern (current)
+- Researcher at Jadavpur University (Mar 2024 - May 2025)
+- Research Intern at NEHU for Indian Sign Language (Feb - Jul 2023)
+- Industrial Trainee at Novotel Kolkata for IT/cloud migration (Dec 2022 - Jan 2023)
+
+**Q: What community service has Aniket done?**
+A: Aniket has volunteered with The Hope Foundation since 2006 (19+ years), teaching underprivileged students, designing educational materials, and coordinating COVID-19 relief efforts including essential supplies and oxygen cylinder distribution.
+
+---
+
+## Personal Questions
+
+**Q: What is Aniket's competitive programming background?**
+A: Aniket is a 4-star coder on CodeChef (rating 1911) and has achieved 5 stars (highest level) on HackerRank in Problem Solving, C++, Python, Java, and C.
+
+**Q: What are Aniket's career goals?**
+A: Aniket aims to apply AI to solve challenges in healthcare and finance. He's interested in AI-driven diagnostics, financial systems that empower decision-making, and bridging opportunity gaps through technology. He's open to research, industry, or entrepreneurship paths.
+
+**Q: What languages does Aniket speak?**
+A: Aniket speaks English (fluent), Hindi (fluent), and Bengali (native).
+
+**Q: What makes Aniket unique?**
+A: Aniket combines strong technical skills (perfect semester grades, research publication, 4-star CodeChef, 5-star HackerRank) with deep commitment to social impact (19+ years of volunteer work). His international exposure, research experience in medical imaging, financial acumen (consistent investment returns), and recent LLM/Agent expertise create a unique interdisciplinary profile.
+
+---
+
+## Availability Questions
+
+**Q: Is Aniket available for internships?**
+A: Yes, Aniket is available for Summer 2026 internships. He is on an F-1 visa and eligible for CPT/OPT work authorization.
+
+**Q: Is Aniket seeking full-time positions?**
+A: Aniket will be seeking full-time positions after completing his MS in May 2027. He is currently focused on his studies and TA responsibilities.
+
+**Q: What roles is Aniket targeting?**
+A: Aniket is targeting AI Engineer, ML Engineer, LLM Engineer, and Research Scientist roles, particularly in healthcare AI, fintech, or companies working on impactful AI applications.
+
+================================================================================
+SECTION 17: RESUME VERSIONS
+================================================================================
+
+## AI Engineer Resume Focus:
+- Emphasize: LLM & GenAI, RAG, Agents, MLOps
+- Lead with: LangChain, CrewAI, OpenAI APIs, Vector DBs
+- Projects: Multi-agent systems, RAG knowledge worker, LLM fine-tuning
+- Skills order: LLM/GenAI → Agents → MLOps → ML Frameworks
+
+## ML Engineer Resume Focus:
+- Emphasize: Model training, PyTorch, Computer Vision, Deep Learning
+- Lead with: PyTorch, TensorFlow, scikit-learn, YOLO
+- Projects: Traffic sign detection, Cell segmentation, NLP work
+- Skills order: ML Frameworks → Data Engineering → MLOps → LLM/GenAI
+
+## Research Resume Focus:
+- Emphasize: Publications, research experience, academic achievements
+- Lead with: Jadavpur research, published paper, patent pending
+- Highlight: TA position, PhD-level course, research mentorship
+- Include: Detailed methodology descriptions
+
+================================================================================
+SECTION 18: CONTACT & AVAILABILITY
+================================================================================
+
+## Contact Information
+- Primary Email: aniket.ghosh@gmail.com
+- University Email: ghosh.anik@northeastern.edu
+- Phone: 857-426-9732
+- Location: Boston, MA, USA
+- LinkedIn: linkedin.com/in/aniketghosh-
+- GitHub: github.com/Ag-hosh
+
+## Current Availability
+- TA Commitment: Teaching NLP labs (Spring 2026)
+- Course Load: 2 courses (Spring 2026)
+- Available for: Summer 2026 internship
+
+## Preferred Communication
+- Email preferred for initial contact
+- Available for video calls (Zoom, Google Meet, Teams)
+- Timezone: Eastern Time (ET)
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+
+Document Statistics:
+- Total Sections: 18
+- Last Updated: January 2026
+- Word Count: ~12,000+
+- Designed for: RAG system ingestion, chatbot knowledge base, interview preparation
