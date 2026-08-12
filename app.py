@@ -459,6 +459,87 @@ RULES: reference the company's actual domain and problem, never a generic versio
             yield _strip_reasoning(out)
 
 
+# ── Suggested prompts ─────────────────────────────────────────────────────
+# Kept here rather than inline in the UI so both the GitHub copy and the HF
+# Space copy stay in sync (their UI sections have diverged; this section hasn't).
+# The three keyed lists pair with *_LABELS — Gradio renders labelled examples as
+# readable chips instead of squeezing full text into a cramped multi-column table.
+
+CHAT_EXAMPLES = [
+    "Tell me about yourself and what you're working on",
+    "Walk me through your LessWrong post on repairing a misaligned fine-tune",
+    "How do linear probes tell you where quantization will hurt?",
+    "Explain the SCD result — probing accuracy vs. causal relevance",
+    "What's the hardest problem you've solved?",
+    "What do you actually do day-to-day at Varosync?",
+    "You train 7–8B models on an 800M-molecule corpus — walk me through that pipeline",
+    "Have you used interpretability in production, or only in research?",
+    "Which interpretability tools do you actually use — nnsight, SAEs, DAS?",
+    "Why AI safety? What does 'safety' mean to you technically?",
+    "What did you teach philosophy PhD students about interpretability?",
+    "Tell me about the grokking / Fourier-circuits reproduction",
+    "Why should we hire you over other new grads?",
+    "Where are you weakest, and what would you need to learn?",
+    "What kind of role are you looking for, and when can you start?",
+    "How do you handle running three demanding things at once?",
+    "What's your experience auditing models for bias?",
+    "What do you want to work on next?",
+]
+
+JOBFIT_LABELS = [
+    "Research Engineer — Interpretability",
+    "ML Engineer — early career",
+    "Applied Scientist — LLM evaluations",
+    "AI Safety Research Fellow / Resident",
+    "ML Infrastructure & Training Engineer",
+    "ML Scientist — drug discovery",
+    "Staff Research Scientist (a deliberate stretch)",
+]
+JOBFIT_EXAMPLES = [
+    ["Research Engineer, Interpretability — Investigate the internals of frontier language models: build tooling and run experiments to reverse-engineer learned representations, evaluate model behavior, and surface safety-relevant failure modes. Strong Python + ML and a research mindset required."],
+    ["Machine Learning Engineer (early-career) — Build and ship ML systems end-to-end: data pipelines, model training, evaluation, and serving. Experience with PyTorch, embeddings, and vector search; comfortable owning projects from scratch."],
+    ["Applied Scientist, LLM Evaluations — Design and run evaluations that measure real model capabilities and failure modes: build benchmarks, run counterfactual and adversarial tests, quantify bias and reliability, and turn findings into launch decisions. Strong statistics and Python required."],
+    ["AI Safety Research Fellow — A funded residency for early-career researchers working on alignment, interpretability, or evaluations. We look for evidence you can run your own research loop end to end: form a hypothesis, build the experiment, beat real baselines, and write it up publicly."],
+    ["ML Infrastructure & Training Engineer — Own distributed training for large models: multi-GPU orchestration, data pipelines at the hundreds-of-millions scale, checkpointing, throughput profiling, and evaluation harnesses. Experience with PyTorch, SLURM, and hybrid-cloud GPU fleets."],
+    ["ML Scientist, Drug Discovery — Build representation-learning models over large molecular corpora: featurization, embedding training, similarity search, and knowledge-graph reasoning over biomedical literature. Cheminformatics background helpful; rigorous evaluation essential."],
+    ["Staff Research Scientist — 7+ years leading large-scale ML research, first-author publications at top venues, and experience setting multi-year research agendas and mentoring teams on frontier models."],
+]
+
+COVER_LABELS = [
+    "Anthropic — Research Engineer, Interpretability",
+    "OpenAI — Member of Technical Staff, Evaluations",
+    "Google DeepMind — Research Engineer, Alignment",
+    "Goodfire — Interpretability Engineer",
+    "Scale AI — Machine Learning Engineer",
+    "Recursion — ML Scientist, Drug Discovery",
+]
+COVER_EXAMPLES = [
+    ["Anthropic", "Research Engineer, Interpretability", "We build tools to understand the internals of frontier models and make them safer through mechanistic interpretability and evaluations."],
+    ["OpenAI", "Member of Technical Staff, Evaluations", "We measure what frontier models can and can't do — building evaluation infrastructure and adversarial tests that inform deployment decisions."],
+    ["Google DeepMind", "Research Engineer, Alignment", "We work on making advanced AI systems reliably do what their operators intend, spanning interpretability, oversight, and evaluation research."],
+    ["Goodfire", "Interpretability Engineer", "We're building an interpretability platform that lets people see and edit the internal features of production language models."],
+    ["Scale AI", "Machine Learning Engineer", "We build data and evaluation infrastructure for frontier AI models."],
+    ["Recursion", "ML Scientist, Drug Discovery", "We industrialize drug discovery by combining large-scale biological and chemical datasets with machine learning to predict which compounds will work."],
+]
+
+HELP_LABELS = [
+    "Frontier-model safety team",
+    "Interpretability startup",
+    "Biotech / drug discovery",
+    "AI evals & red-teaming",
+    "Healthcare AI — clinical decision support",
+    "Seed-stage startup, first ML hire",
+]
+HELP_EXAMPLES = [
+    ["A frontier-model safety team", "We need reliable evals for deceptive behavior and scheming in agentic LLMs."],
+    ["An interpretability startup", "We want to turn research techniques — SAEs, activation steering, attribution — into tooling customers can actually run on production models."],
+    ["An early-stage biotech", "Scaling molecular-similarity search and embeddings over hundreds of millions of compounds for drug discovery."],
+    ["An AI evals and red-teaming lab", "We need to measure bias and unsafe behavior in deployed LLMs rigorously enough that the results hold up to outside scrutiny."],
+    ["A healthcare AI company", "Clinicians won't trust our diagnostic model unless they can inspect why it reached a given recommendation."],
+    ["A seed-stage startup", "You'd be our first ML hire — we have data and a hypothesis but no pipeline, no labels, and no evaluation story yet."],
+]
+
+
 # ── Build ─────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("🤖 ANIKET GHOSH — DIGITAL TWIN")
@@ -492,6 +573,20 @@ button.primary:hover, .twin-cta:hover { filter: brightness(1.07); }
 .twin-out * { overflow-wrap: anywhere; }
 #twin-footer, #twin-footer * { color: var(--body-text-color-subdued) !important; font-size: .8rem; }
 
+/* Suggestion chips (gr.Examples with example_labels). Gradio clips these to one
+   nowrap line, which cut the longer labels off mid-word. Let them wrap. */
+.gradio-container .gallery .gallery-item,
+.gradio-container button.gallery-item,
+.gradio-container .examples .gallery-item {
+  white-space: normal !important; overflow: visible !important;
+  text-overflow: clip !important; height: auto !important;
+  max-width: 100% !important; text-align: left !important;
+  line-height: 1.45 !important; padding: 7px 12px !important; }
+.gradio-container .gallery { flex-wrap: wrap !important; gap: 6px !important; }
+/* Any examples still rendered as a table: let cells wrap instead of clipping. */
+.gradio-container .table-wrap td, .gradio-container .table-wrap th {
+  white-space: normal !important; overflow-wrap: anywhere !important; }
+
 /* ── Mobile: stack the input/output panes full-width, tighten the chrome ── */
 @media (max-width: 768px) {
   .gradio-container { padding-left: 6px !important; padding-right: 6px !important; }
@@ -521,16 +616,7 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
             gr.Markdown("Ask about my background, projects, interpretability/safety work, or how I work.")
             gr.ChatInterface(
                 twin.chat,
-                examples=[
-                    "Tell me about yourself and what you're working on",
-                    "What's the hardest / most complex problem you've solved?",
-                    "Walk me through your mechanistic interpretability work (SCD)",
-                    "Tell me about the molecular-similarity search you're building at Varosync",
-                    "Why are you interested in AI safety and interpretability?",
-                    "How do you handle a heavy workload?",
-                    "What kind of role are you looking for?",
-                    "What's your experience auditing models for bias?",
-                ],
+                examples=CHAT_EXAMPLES,
                 cache_examples=False,
             )
 
@@ -546,11 +632,8 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
             jf_btn.click(twin.analyze_job_fit, inputs=jf_in, outputs=jf_out)
             gr.Examples(
                 label="🧪 Try a sample job description (click to fill & run)",
-                examples=[
-                    ["Research Engineer, Interpretability — Investigate the internals of frontier language models: build tooling and run experiments to reverse-engineer learned representations, evaluate model behavior, and surface safety-relevant failure modes. Strong Python + ML and a research mindset required."],
-                    ["Machine Learning Engineer (early-career) — Build and ship ML systems end-to-end: data pipelines, model training, evaluation, and serving. Experience with PyTorch, embeddings, and vector search; comfortable owning projects from scratch."],
-                    ["Staff Research Scientist — 7+ years leading large-scale ML research, first-author publications at top venues, and experience setting multi-year research agendas and mentoring teams on frontier models."],
-                ],
+                examples=JOBFIT_EXAMPLES,
+                example_labels=JOBFIT_LABELS,
                 inputs=jf_in,
                 outputs=jf_out,
                 fn=twin.analyze_job_fit,
@@ -572,10 +655,8 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
             cl_btn.click(twin.cover_letter, inputs=[cl_company, cl_role, cl_jd], outputs=cl_out)
             gr.Examples(
                 label="🧪 Try a sample (click to fill & run)",
-                examples=[
-                    ["Anthropic", "Research Engineer, Interpretability", "We build tools to understand the internals of frontier models and make them safer through mechanistic interpretability and evaluations."],
-                    ["Scale AI", "Machine Learning Engineer", "We build data and evaluation infrastructure for frontier AI models."],
-                ],
+                examples=COVER_EXAMPLES,
+                example_labels=COVER_LABELS,
                 inputs=[cl_company, cl_role, cl_jd],
                 outputs=cl_out,
                 fn=twin.cover_letter,
@@ -596,10 +677,8 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
             h_btn.click(twin.how_i_help, inputs=[h_company, h_focus], outputs=h_out)
             gr.Examples(
                 label="🧪 Try a sample (click to fill & run)",
-                examples=[
-                    ["A frontier-model safety team", "We need reliable evals for deceptive behavior and scheming in agentic LLMs."],
-                    ["An early-stage biotech", "Scaling molecular-similarity search and embeddings over millions of compounds for drug discovery."],
-                ],
+                examples=HELP_EXAMPLES,
+                example_labels=HELP_LABELS,
                 inputs=[h_company, h_focus],
                 outputs=h_out,
                 fn=twin.how_i_help,
