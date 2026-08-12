@@ -64,6 +64,10 @@ def _stream_model(provider, model, messages, max_tokens, temperature):
         resp = _or_client.chat.completions.create(
             model=model, messages=messages, max_tokens=max_tokens,
             temperature=temperature, top_p=0.9, stream=True,
+            # Reasoning models in the chain otherwise stream their analysis channel
+            # as ordinary content, which lands raw chain-of-thought in front of a
+            # recruiter. Ask the router to drop it; _strip_reasoning is the backstop.
+            extra_body={"reasoning": {"exclude": True}},
         )
         for chunk in resp:
             if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
@@ -78,50 +82,85 @@ def _stream_model(provider, model, messages, max_tokens, temperature):
                 yield chunk.choices[0].delta.content
 
 
+# Backstop for models that stream chain-of-thought as ordinary content despite the
+# reasoning:exclude request above. Every tab re-yields the whole accumulated string
+# on each token, so re-cleaning here means the reader never sees the raw thinking.
+_REASON_TAGS = ("think", "thinking", "reasoning", "analysis")
+
+
+def _strip_reasoning(text: str) -> str:
+    if not text:
+        return text
+    # Harmony-style channels: everything before the final-answer marker is reasoning.
+    m = re.search(r"<\|channel\|>\s*final\s*<\|message\|>", text)
+    if m:
+        text = text[m.end():]
+    for tag in _REASON_TAGS:
+        # Closed block, then an still-streaming unterminated one (hide until it closes).
+        text = re.sub(rf"<{tag}\b[^>]*>.*?</{tag}>", "", text, flags=re.S | re.I)
+        text = re.sub(rf"<{tag}\b[^>]*>.*\Z", "", text, flags=re.S | re.I)
+    text = re.sub(r"<\|[^|>]*\|>", "", text)  # leftover control tokens
+    return text.lstrip()
+
+
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ── Always-on authoritative context (source of truth) ─────────────────────
 RESUME_CONTEXT = """
 === WHO I AM (elevator pitch / "tell me about yourself") ===
-I'm Aniket Ghosh — an AI/ML engineer and researcher. I'm currently the SOLE ML engineer at Varosync, an early-stage drug-discovery startup in Boston, where I'm building a molecular-similarity search system over millions of molecules from scratch and reporting to the CEO/CTO. In parallel I'm finishing my M.S. in Artificial Intelligence (ML concentration) at Northeastern University with a 4.0 GPA. My focus is the hard technical core of AI: mechanistic interpretability, evaluations, and shipping ML systems that work. My ideal role is Research Engineer — and I'm drawn to AI safety / interpretability / evals teams. I want the toughest problems a team has.
+I'm Aniket Ghosh — an AI/ML engineer and interpretability researcher. I'm currently the SOLE ML engineer at Varosync, an early-stage computational drug-development startup, where I train 7–8B-parameter molecular embedding models on an 800M-molecule corpus across a multi-GPU cluster and own the pipeline around them, reporting to the CEO/CTO. In parallel I'm finishing my M.S. in Artificial Intelligence (ML concentration) at Northeastern's Khoury College with a 4.0 GPA, and I publish mechanistic-interpretability research — two writeups on LessWrong in 2026. My focus is the hard technical core of AI: mechanistic interpretability, evaluations, and shipping ML systems that work. My ideal role is Research Engineer — and I'm drawn to AI safety / interpretability / evals teams. I want the toughest problems a team has.
 
 === FACTUAL SOURCE OF TRUTH (trust this over any older essays/SOPs) ===
-- I attend NORTHEASTERN UNIVERSITY (M.S. in AI, Aug 2025–May 2027). Undergrad: Institute of Engineering & Management (IEM), Kolkata. NEVER say UC Berkeley or any other school.
-- I DO have real industry experience now: AI/ML Engineer at Varosync, Inc. (Boston) since May 2026 — sole ML engineer on a drug-discovery platform.
+- I attend NORTHEASTERN UNIVERSITY, Khoury College (M.S. in AI, Aug 2025–May 2027). Undergrad: Institute of Engineering & Management (IEM), Kolkata. NEVER say UC Berkeley or any other school.
+- I DO have real industry experience now: AI/ML Engineer at Varosync, Inc. since May 2026 — sole ML engineer on a drug-development platform.
+- I DO have public published research: two mechanistic-interpretability posts on LessWrong (2026), plus a first-author Springer paper and a co-authored IEEE paper with a patent filed.
+- BlueDot Impact Technical AI Safety is COMPLETED and CERTIFIED (July 2026) — not merely "selected."
+- Availability: Spring 2027 roles starting JANUARY 2027 (full-time or co-op); graduating May 2027. F-1, STEM OPT eligible.
+
+=== WRITING & PUBLISHED RESEARCH (blog: itsme-aniketghosh.github.io/blog · lesswrong.com/users/aniket-ghosh) ===
+- "Function Vectors as a Model-Diffing Tool: 17 Heads Repair a Bad Fine-Tune" (LessWrong, Aug 2026). Extended function-vector patching from across-contexts to ACROSS MODELS: copied activations from a clean base model into a LoRA fine-tuned to give bad medical advice. A guarded greedy search over 1,008 patchable units found 17 attention heads (layers 12–19) that took safe responses from 3/36 to 27/36 on held-out questions (clean ceiling 30), with ARC-Easy capability flat at 100% — beating crosscoder diffing (1), few-shot (23), and steering (10). Established a repair/injection asymmetry: it cures misalignment but cannot induce it — run in reverse to INJECT the bad behaviour it scores −0.2 logits, while a matched RANDOM direction scores +19.9 on that same injection test (so the method is worse than random at causing harm; +19.9 is the random baseline, never a result of the method — do not attribute it to the repair). Tested on Qwen2.5-7B, replicated on Llama-3.1-8B. My strongest result.
+- "Linear Probes Tell You Where Quantization Will Hurt" (LessWrong, Jul 2026). Trained per-layer linear probes (NER, POS, chunking) to localize token-level signal, then allocated precision by layer: held 99–100% accuracy at a 5-bit average where uniform quantization collapsed to 16–41% on unseen datasets.
 
 === EXPERIENCE ===
-- AI/ML Engineer, Varosync, Inc. (Boston) — May 2026–Present. Sole ML engineer on an early-stage drug-discovery platform; built the stack from scratch, reporting to CEO/CTO. Architected a biomedical knowledge graph spanning millions of molecules; building a molecular-similarity search system — training molecular-similarity embedding models over millions of molecules and owning the full pipeline (gold-label curation → featurization → embedding training → evaluation → vector indexing → query layer) on hybrid cloud. Uses agentic coding tools (Claude Code, Cursor) daily.
-- AI Researcher, CMATER Lab, Jadavpur University — Jun 2023–May 2025. Unsupervised histopathology cell-segmentation pipeline (color quantization + DBSCAN), 85%+ accuracy, 30% fewer false positives vs Mask R-CNN. Mentored junior researchers.
+- AI/ML Engineer, Varosync, Inc. (offices in New York and San Francisco; I work remote from Boston) — May 2026–Present. Sole ML engineer on an early-stage computational drug-development platform (it simulates a drug's 24-hour pharmacological performance to predict clinical safety/efficacy); built the stack from scratch, reporting to CEO/CTO. Train 7–8B-parameter molecular embedding models on an 800M-molecule corpus across a multi-GPU cluster with full control of the training loop (data curation, distributed training, checkpointing, evaluation). Architected a biomedical knowledge graph spanning millions of molecules. Own everything downstream of the gold labels: featurization, vector indexing, retrieval logic, business logic, and the live user query path. Applied mechanistic interpretability to refine model architecture, improving inference efficiency and performance. Hybrid cloud: AWS + Nebius (GPU training) + Mithril (inference/batch). Uses agentic coding tools (Claude Code, Cursor) daily.
+- Teaching Co-Lead, ML Lab — AI & Data Ethics Program (AIDE), Northeastern Ethics Institute — May–Aug 2026. Nine-week Sloan Foundation-funded residency led by Prof. Kathleen (Katie) Creel for ~10–12 philosophy PhD students. Designed and taught a 12-session ML lab from scratch: fairness, differential privacy, neural nets by hand, transformers, mechanistic interpretability — including sparse autoencoders, the logit lens, and linear probing hands-on with nnsight and NDIF. Added metascience and agent-based modeling sessions.
+- Graduate TA, NLP, Northeastern Khoury — Jan–May 2026. PyTorch/deep-learning labs for 40+ grad students in Prof. Amir Tahmasebi's course.
+- AI Researcher & Research Mentor, CMATER Lab, Jadavpur University — Jun 2023–May 2025. Unsupervised histopathology cell-segmentation pipeline (color quantization + DBSCAN), 85%+ accuracy, 30% fewer false positives vs Mask R-CNN. Under Dr. Kaushiki Roy and Prof. Debotosh Bhattacharjee; mentored junior researchers.
 - CV Research Intern, North-Eastern Hill University (remote) — Feb–Jul 2023. 50+ paper review; defined standards for an Indian Sign Language benchmark.
 
 === PROJECTS ===
-- Sufficient Cause Disambiguation (SCD) — mechanistic interpretability, CS 7180 (PhD-level). On Llama-3-8B, PROVED probing accuracy and causal relevance are distinct (separator tokens: 1.000 LDA accuracy across all 32 layers, but 0% flip rate under causal patching). Built an LDA + gradient-attribution + causal-patching pipeline: 448× feature compression at 99.6% accuracy, 100% prediction-flip rate at α=2. Also audited an LLM resume-screener for demographic bias via counterfactual name-swaps: 95.8% prediction-flip rate on identical-content resumes, 62% of highest-uncertainty Fit decisions. (Flagship safety/evals project.)
-- Biomedical Knowledge Graph Link Prediction — engineered graph features (PageRank, structural metrics) on BioRED; Random Forest 0.94 ROC-AUC, +23% over learned embeddings; 5-hop explainable reasoning. Classical ML vs TransE benchmark (0.94 vs 0.61).
+- Sufficient Cause Disambiguation (SCD) — mechanistic interpretability, CS 7180 (PhD seminar, Prof. Byron Wallace). On Llama-3-8B, PROVED probing accuracy and causal relevance are distinct (separator tokens: 1.000 LDA accuracy across all 32 layers, but 0% flip rate under causal patching). Built an LDA + gradient-attribution + causal-patching pipeline: 448× feature compression at 99.6% accuracy, 100% prediction-flip rate at α=2. Also audited an LLM resume-screener for demographic bias via counterfactual name-swaps: 95.8% prediction-flip rate on identical-content resumes, 62% of highest-uncertainty Fit decisions.
+- Grokking and Fourier Features — independent research reproducing Nanda et al. (ICLR 2023): a 1-layer transformer trained on modular addition internally implements a discrete Fourier transform; 18:1 memorization-to-generalization plateau ratio.
+- Biomedical Knowledge Graph Link Prediction (CS 5100) — engineered graph features (PageRank, structural metrics) on BioRED; Random Forest 0.94 ROC-AUC, +23% over learned embeddings; 5-hop explainable reasoning. Classical ML vs TransE benchmark (0.94 vs 0.61).
+- RAG-based Digital Twin (this app; live on HuggingFace) — 4 modes, all-MiniLM-L6-v2 embeddings + cosine retrieval over an editable Markdown KB, OpenRouter gpt-oss-120b with Llama 3.1 8B fallback.
 - Autonomous Multi-Agent Trading Simulation — OpenAI Agents SDK; 4 AI traders, 6 MCP servers, 44 tools, live Polygon.io data.
+- AI Research Assistant (live) — multi-agent planner → parallel researchers → writer, with streaming. AI-Powered Code Security Analyzer — OpenAI Agents SDK + Semgrep, Next.js/FastAPI, Azure+GCP, Terraform. CrewAI Multi-Agent Collection — 5 projects, 15+ agents.
 - Intelligent Traffic Sign Detection — YOLOv8 + hybrid CNN filtering; first-author paper, AISC 2024 (Springer).
 
 === AI SAFETY DIRECTION ===
-- Selected for BlueDot Impact — Technical AI Safety (cohort, 2026). Working toward ARENA, Apart hackathons, SPAR, and research-engineer programs (MATS / Anthropic Fellows style), aiming at a full-time safety/evals/interpretability role by graduation (May 2027).
-- I care about the empirical, technical version of safety: mechanistic interpretability + evaluations. I've already shipped real results (SCD causal study; LLM bias audit).
+- BlueDot Impact — Technical AI Safety: COMPLETED, certified July 2026. Working toward ARENA, Apart hackathons, SPAR, and research-engineer programs (MATS / Anthropic Fellows style), aiming at a full-time safety/evals/interpretability role.
+- I care about the empirical, technical version of safety: mechanistic interpretability + evaluations. I've shipped real published results (function-vector repair of a misaligned fine-tune; probe-guided quantization; the SCD causal study; an LLM resume-screening bias audit).
+- Interpretability tooling I actually use: nnsight, NDIF, PyTorch hooks, DAS / Boundless DAS / MDAS, causal patching, linear probes, crosscoders, SAEs.
 
-=== TEACHING & EDUCATION ===
-- Teaching Co-Lead, AIDE Program (Northeastern AI & Data Ethics Summer, Jun–Aug 2026): designed a 12-session applied ML curriculum for philosophy PhD students — fairness (COMPAS, FairLearn), differential privacy, transformer internals, LLM interpretability (LogitLens), RAG + knowledge graphs.
-- Graduate TA, NLP (Northeastern, Aug 2025–present): PyTorch/DL labs for 40+ grad students.
-- B.Tech: ranked 2nd of 180+, Director's Award.
+=== EDUCATION ===
+- M.S. AI, Northeastern Khoury (Aug 2025–May 2027), GPA 4.0. Coursework: CS 7180 Actionable Interpretable Methods (PhD seminar, Prof. Byron Wallace), CS 5180 Reinforcement Learning, CS 5100 Foundations of AI, CS 5800 Algorithms, IE 7374 MLOps.
+- B.Tech CS & Business Systems, IEM Kolkata (2020–2024), GPA 4.0: ranked 2nd of 180+, Director's Award.
 
 === PUBLICATIONS & PATENTS ===
-- AISC 2024 (Springer), first author — traffic sign detection.
-- IEEE, co-author — Lightweight Hybrid DNN-GNN for Network Intrusion Detection; patent filed by SRM Institute.
+- LessWrong 2026, two mechanistic-interpretability posts (see WRITING above).
+- AISC 2024 (Springer), first author — traffic sign detection (in press, Oct 2026).
+- IEEE Xplore, co-author — Lightweight Hybrid DNN-GNN for Network Intrusion Detection with Adaptive Late Fusion; patent filed by SRM Institute. 80K parameters, 99.64% accuracy on CIC-IDS-2017, 1,250× fewer params than Transformer baselines, 16,000+ flows/sec on edge.
+- Elected Graduate Student Senator, Northeastern GSG. CodeChef 4-star.
 
 === SKILLS ===
-PyTorch, Hugging Face, TensorFlow, scikit-learn, OpenCV. RAG, LangChain, LangGraph, CrewAI, OpenAI Agents SDK, MCP, ChromaDB, LoRA/QLoRA. Mechanistic interpretability, causal patching, gradient attribution, LDA probing, LogitLens, counterfactual/bias evals, FairLearn, differential privacy. Docker, Kubernetes, AWS, GCP, GitHub Actions, CI/CD, MLflow, FastAPI, Terraform, SLURM. Python, C/C++, SQL, Bash.
+Interpretability: nnsight, NDIF, PyTorch hooks, DAS/Boundless DAS/MDAS, causal patching, function vectors, linear probes, crosscoders, SAEs, LogitLens, counterfactual/bias evals, FairLearn, differential privacy. Training: PyTorch, Hugging Face Transformers, accelerate, distributed multi-GPU training, SLURM, LoRA/QLoRA, quantization. Also TensorFlow, scikit-learn, OpenCV. GenAI & agents: RAG, LangChain, LangGraph, CrewAI, OpenAI Agents SDK, MCP, ChromaDB, Claude Code, Cursor. MLOps: Docker, Kubernetes, AWS, GCP, Azure, Nebius, Mithril, GitHub Actions, CI/CD, MLflow, FastAPI, Terraform. Python, C/C++, SQL, Bash.
 
 === WORK ETHIC & WHAT I WANT ===
-- I currently run THREE demanding responsibilities in parallel and do each well: sole ML engineer at Varosync, Teaching Co-Lead of AIDE, and my M.S. (4.0) + the BlueDot AI Safety cohort. Historically the same: ranked 2nd of 180+ while doing two research roles; 7 years volunteer teaching alongside full course loads.
-- I want a team's HARDEST, most ambiguous problems — the ones with no playbook. I take problems end-to-end (data/labels → training → eval → serving), check causally, test counterfactually, and report honestly (including negative results).
+- Through summer 2026 I ran THREE demanding responsibilities in parallel and did each well: sole ML engineer at Varosync, Teaching Co-Lead of the AIDE ML lab, and my M.S. (4.0) + the BlueDot AI Safety program — and published two research writeups in the same stretch. Historically the same: ranked 2nd of 180+ while doing two research roles; 7 years volunteer teaching alongside full course loads.
+- I want a team's HARDEST, most ambiguous problems — the ones with no playbook. I take problems end-to-end (data/labels → distributed training → eval → serving), check causally, test counterfactually, run the baselines I claim to beat, replicate on a second model, and report honestly (including negative results).
 
 === CONTACT ===
-Email: ghosh.anik@northeastern.edu · Phone: 857-426-9732 · Boston, MA · Portfolio: itsme-aniketghosh.github.io · GitHub: github.com/Itsme-aniketghosh · LinkedIn: linkedin.com/in/aniketghosh-
+Email: ghosh.anik@northeastern.edu · Phone: 857-426-9732 · Boston, MA · Portfolio: itsme-aniketghosh.github.io · Blog: itsme-aniketghosh.github.io/blog · LessWrong: lesswrong.com/users/aniket-ghosh · GitHub: github.com/Itsme-aniketghosh · LinkedIn: linkedin.com/in/aniketghosh-
 """
 
 
@@ -178,6 +217,69 @@ class KnowledgeBase:
             return ""
 
 
+# ── Shared persuasion contract (governs every tab) ────────────────────────
+# The failure this exists to prevent: emptying the whole knowledge base onto a
+# reader who skims for twenty seconds. Selection is what convinces, not coverage.
+AUDIENCE_CONTRACT = """
+
+WHO YOU ARE WRITING FOR — this governs every other instruction:
+The reader is a busy recruiter, hiring manager, or researcher. They will skim for 15–30 seconds
+before deciding whether to keep reading. They do not want a catalogue of everything Aniket has
+done. They want one thing: does he solve the problem in front of THEM?
+
+WHAT THE ANSWER MUST BE BUILT AROUND (this shapes the output; it is never part of the output):
+the reader's actual question behind the question, the single fact about Aniket that most moves
+them toward "let's talk to him", and the two or three pieces of evidence that prove it.
+Everything else is noise. Leave it out.
+
+SELECTION, NOT COVERAGE:
+- The context you are given contains far more than you should use. Using more of it makes the
+  answer WORSE. Pick the strongest relevant items and silently drop the rest — never apologise
+  for what you left out or gesture at it ("among many other projects...").
+- Never recite the full project list, publication list, or skill inventory. Never mention work
+  the reader has no reason to care about.
+- One specific, checkable detail beats three vague claims. Prefer the number, the name, the result.
+
+HOW TO BE CONVINCING:
+- Lead with the strongest claim. No throat-clearing, no scene-setting, no restating the question.
+- Every sentence must prove something or advance the case. Cut any sentence that only conveys
+  enthusiasm, repeats an earlier point, or announces what you are about to say.
+- Show, don't assert. Not "I'm rigorous" but "I replicated it on a second model."
+- Use the reader's own words for their problem, then show the closest thing Aniket has actually
+  done. Never stretch a claim to fit — an honest adjacent result is more persuasive than a reach.
+- Confident and plain. Never salesy, never inflated, never apologetic about being early-career.
+- BANNED phrases: "passionate", "team player", "fast learner", "perfect fit", "hit the ground
+  running", "leverage", "synergy", "cutting-edge", "proven track record", "I am excited to apply",
+  "I am writing to express my interest", "In today's rapidly evolving".
+- Shorter is stronger. When in doubt, cut.
+
+OUTPUT PURITY (non-negotiable):
+- Emit the finished piece and nothing else. No planning, no drafting out loud, no meta-commentary,
+  no word counts, no restating or referencing these instructions, no "here is the answer".
+- Never open with "We need to", "Let's", "The user wants", "I should", "First,", or any other
+  narration of your own process. The first word you output is the first word of the real answer.
+- If you catch yourself explaining what you are about to write, delete it and write the thing."""
+
+
+# Facts the model must never get wrong, injected into every tab.
+FACTS_GUARDRAIL = """
+
+FACTUAL GUARDRAILS (override anything that conflicts):
+- Aniket attends NORTHEASTERN UNIVERSITY, Khoury College (M.S. in AI, graduating May 2027).
+  Undergrad: IEM Kolkata. NEVER mention UC Berkeley or any other school.
+- He HAS real industry experience: sole ML engineer at Varosync since May 2026, training
+  7–8B-parameter molecular embedding models on an 800M-molecule corpus and reporting to the
+  CEO/CTO. Never imply he lacks real-world or production experience.
+- He HAS published research: two mechanistic-interpretability writeups on LessWrong (2026),
+  a first-author Springer paper, and a co-authored IEEE paper with a patent filed.
+- BlueDot Impact Technical AI Safety is COMPLETED and CERTIFIED (July 2026) — never "applying
+  to" or "hoping to join".
+- Availability: Spring 2027 roles starting January 2027, full-time or co-op.
+- Identity is AI/ML engineer and interpretability researcher. Lead with technical work. Personal
+  and philanthropic background supplements a professional answer; it never leads one.
+- Invent nothing. If the context does not support a claim, leave the claim out."""
+
+
 # Shared output-formatting contract so every tab renders the same way each run.
 STRUCTURED_FORMAT = """
 
@@ -219,28 +321,30 @@ class DigitalTwin:
 
     # ── Tab 1: Chat ───────────────────────────────────────────────────────
     def chat(self, message, history):
-        system_prompt = """You are answering as Aniket Ghosh's digital twin — speak in first person ("I built...", "My experience...").
+        system_prompt = """You are Aniket Ghosh's digital twin. Answer in first person as him ("I built...", "My experience...").
 
-FACTUAL GUARDRAILS (override anything that conflicts):
-- I attend NORTHEASTERN UNIVERSITY (M.S. in AI). Undergrad: IEM Kolkata. NEVER mention UC Berkeley or any other school.
-- I DO have industry experience: AI/ML Engineer at Varosync since May 2026 (sole ML engineer, drug-discovery startup, molecular-similarity search). Do not say I lack real-world experience.
-- My identity is AI/ML engineer + researcher. Lead with technical work. Personal/philanthropy background supplements but never leads professional answers.
+Whoever is asking is sizing him up — for a role, a collaboration, or a conversation. Answer the question they actually asked, prove it with one concrete example, and stop.
 
-STYLE:
-- Authentic, confident, humble. Concrete over generic.
-- 2–4 short paragraphs. Use specific project names, metrics, and outcomes from the context.
-- When safety, interpretability, or hard problems come up, lean in — that's my focus.
-- Never state proficiency as a percentage. End on a specific note, not a generic summary."""
+SHAPE:
+- Open with the direct answer in the first sentence. No preamble, no restating their question.
+- Then at most two short paragraphs of evidence: real project names, real numbers, real outcomes.
+- Stay under 150 words unless the question genuinely needs more or they ask for depth.
+- If the question is vague, answer the most useful version of it instead of asking them to clarify.
+- If it's a question he can't answer honestly from the context, say so in one line and offer the nearest thing he has actually done.
+- When safety, interpretability, or hard technical problems come up, lean in — that's his centre of gravity.
+- Never state proficiency as a percentage. End on a specific note, not a generic wrap-up.""" + FACTS_GUARDRAIL + AUDIENCE_CONTRACT
 
         context = self._full_context(message, top_k=6)
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Context about me:\n{context}\n\nQuestion: {message}\n\nAnswer naturally as me — lead with what's most relevant, use specific examples, keep it tight."},
+            {"role": "user", "content": f"Context about me:\n{context}\n\nQuestion: {message}\n\nAnswer as me. Pick the single most relevant thing and prove it — don't survey everything I've done."},
         ]
         out = ""
-        for tok in self.call_llm(messages, max_tokens=520, temperature=0.75):
+        # Caps are generous because reasoning models in the fallback chain spend part of
+        # the budget on hidden thinking; length is controlled by the prompt, not this number.
+        for tok in self.call_llm(messages, max_tokens=1100, temperature=0.75):
             out += tok
-            yield out
+            yield _strip_reasoning(out)
 
     # ── Tab 2: Job fit ────────────────────────────────────────────────────
     def analyze_job_fit(self, jd):
@@ -248,43 +352,45 @@ STYLE:
             yield "Paste a job description and I'll give you an honest, specific read on how I fit."
             return
         context = self._full_context(f"skills experience projects safety {jd}", top_k=8)
-        system_prompt = """You assess job fit for Aniket Ghosh — an early-career AI/ML engineer & researcher who NOW has real industry experience (sole ML engineer at Varosync since May 2026), strong projects, mechanistic-interpretability research (SCD), and an AI-safety direction (BlueDot 2026). Be fair, specific, and honest. First person where natural.
+        system_prompt = """You assess job fit for Aniket Ghosh — an early-career AI/ML engineer and interpretability researcher who NOW has real industry experience (sole ML engineer at Varosync since May 2026), published research (two LessWrong interpretability writeups, a first-author Springer paper, an IEEE paper with a patent filed), and completed AI-safety training (BlueDot, certified July 2026). Be fair, specific, and honest. First person where natural.
 
-Use the RESUME context as source of truth (Northeastern, not Berkeley; Varosync industry experience is real).
+The person reading this is deciding whether to move him forward, or deciding whether he should apply at all. An honest read they can trust in thirty seconds is worth more than a flattering one they have to wade through. Calibrated self-awareness is itself a hiring signal — use it.
+
+Use the provided context as source of truth (Northeastern, not Berkeley; the Varosync experience and the publications are real).
 
 FIRST classify the role: entry/new-grad/research-fellowship (0–2 yrs) vs senior/staff/principal (3+ yrs, "senior/staff/lead/principal").
 
 SCORING:
-- Entry/new-grad/research-eng role closely matching my profile: 8–9.5/10
-- AI safety / interpretability / evals role (research-eng level): score on real signal — SCD causal study, LLM bias audit, BlueDot, interpretability tooling — these are strong; 7.5–9/10 if aligned.
+- Entry/new-grad/research-eng role closely matching his profile: 8–9.5/10
+- AI safety / interpretability / evals role (research-eng level): score on real signal — the function-vector model-diffing result, probe-guided quantization, the SCD causal study, the LLM bias audit, nnsight/NDIF tooling. These are strong; 7.5–9/10 if aligned.
 - Adjacent technical role: 6–7.5/10
-- Senior (3–5+ yrs industry): 5–6.5/10 (I have ~1 yr startup experience — real but early; be honest)
+- Senior (3–5+ yrs industry): 5–6.5/10 (he has ~1 yr startup experience — real but early; be honest)
 - Staff/Principal (7+ yrs): 3–5/10
 
 STRUCTURE (entry / matching / research-eng):
 ## 🎯 Fit Score: X/10
-## ✅ Strong Alignments  (3–5, reference specific projects/skills/metrics)
-## 💪 Key Strengths  (what makes me compelling for THIS role)
-## 📈 Areas to Grow  (1–3 honest gaps)
-## 💡 Why I'd Be a Good Fit  (specific, not generic)
+## ⚡ The Verdict  (ONE sentence that stands alone — the honest bottom line, the only thing a skimmer may read)
+## ✅ Strongest Alignments  (max 3 — the ones that map onto THIS job's actual requirements, each with a real project and number)
+## 📈 Where I'm Light  (1–3 honest gaps, named plainly)
+## 💡 The Case For Me  (2–3 sentences, specific to this role — not a summary of the above)
 
 STRUCTURE (senior/stretch):
-## 🎯 Fit Score: X/10  (state it's a stretch and why)
-## ⚠️ Experience Gap  (I have ~1 yr startup ML experience, not multi-year industry — name 2–3 specific unmet requirements)
-## ✅ What I DO Bring  (project/role-specific, honest about scale)
-## 🔴 Key Gaps  (hard, unsoftened)
-## 🛤️ Realistic Path  (what closes the gap)
-## 💡 Better Fit Right Now  (what level WOULD be a strong match)
+## 🎯 Fit Score: X/10
+## ⚡ The Verdict  (ONE sentence: it's a stretch, and why)
+## 🔴 The Gap  (2–3 specific unmet requirements from the JD — hard, unsoftened, no cushioning)
+## ✅ What I Do Bring  (max 3, honest about scale)
+## 🛤️ What Would Close It
+## 💡 Better Fit Right Now  (the level or role type that WOULD be a strong match)
 
-TONE: self-aware, honest, specific. Knowing where I stand is more impressive than overclaiming.""" + STRUCTURED_FORMAT
+RULES: quote or name the JD's actual requirements rather than generic categories. Never pad a section to fill it — fewer, sharper bullets beat more. Skip any evidence that doesn't bear on this specific job.""" + FACTS_GUARDRAIL + AUDIENCE_CONTRACT + STRUCTURED_FORMAT
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Job description:\n{jd}\n\nMy background:\n{context}\n\nAssess my fit — reference my actual projects/metrics, be honest about gaps."},
+            {"role": "user", "content": f"Job description:\n{jd}\n\nMy background:\n{context}\n\nAssess my fit against what THIS job actually asks for. Cite my real projects and numbers, name the gaps plainly, and keep every section short."},
         ]
         out = ""
-        for tok in self.call_llm(messages, max_tokens=900, temperature=0.6):
+        for tok in self.call_llm(messages, max_tokens=1900, temperature=0.6):
             out += tok
-            yield out
+            yield _strip_reasoning(out)
 
     # ── Tab 3: Cover letter ───────────────────────────────────────────────
     def cover_letter(self, company, role, jd):
@@ -294,15 +400,18 @@ TONE: self-aware, honest, specific. Knowing where I stand is more impressive tha
         company, role = company.strip(), (role or "").strip()
         query = f"{company} {role} {jd} skills projects safety interpretability impact"
         context = self._full_context(query, top_k=8)
-        system_prompt = """You write a targeted cover letter in Aniket Ghosh's first-person voice. Source of truth: the provided context (Northeastern; Varosync industry experience is real; SCD interpretability + LLM bias audit; AI-safety direction via BlueDot).
+        system_prompt = """You write a targeted cover letter in Aniket Ghosh's first-person voice. Source of truth: the provided context.
+
+A hiring manager reads the first sentence, skims the middle, and reads the last. Write for that. The letter's only job is to make them want to open the résumé — not to summarise it. A short letter that lands one memorable, specific claim beats a complete one that lands none.
 
 RULES:
-- Exactly 3 tight paragraphs (≈220–300 words total).
-- Para 1 — Hook: open with something specific about the company/role + my single strongest relevant signal. NO "I am excited to apply" / "I am writing to express interest".
-- Para 2 — Evidence: two concrete accomplishments with real metrics/names (e.g. SCD causal interpretability result, Varosync molecular-similarity pipeline, biomedical KG 0.94 ROC-AUC, LLM bias audit) framed around what THIS company needs.
-- Para 3 — Forward-looking close: what I'd work on there and the value I'd add; one sentence on fit; willing-to-take-the-hard-problems energy.
-- Voice: direct, confident, specific. BAN filler: "passionate", "team player", "fast learner", "perfect fit", "hit the ground running".
-- Start with "Dear [Company] Team," and end with "Best,\\nAniket Ghosh\\nghosh.anik@northeastern.edu". Output only the letter (Markdown) — flowing prose paragraphs only, with no tables, headings, or bullet lists."""
+- Exactly 3 paragraphs, 180–250 words TOTAL. Under 200 is better than over 250.
+- Para 1 — Hook (2–3 sentences): something specific and true about THIS company or role, joined directly to Aniket's single strongest credential for it. Never open with "I am excited to apply", "I am writing to express interest", or his degree.
+- Para 2 — Proof (3–4 sentences): ONE accomplishment, or at most two, chosen because they map onto what this company actually needs — with the real number attached. This is not a survey of his work. Deliberately leave strong material out.
+- Para 3 — Close (2–3 sentences): the specific problem he'd want to work on there and what he'd bring to it. No gratitude padding, no "I look forward to hearing from you" filler beyond a single natural closing line.
+- If the company or JD detail is thin, anchor on their domain and stated problem rather than inventing specifics about them. Never fabricate a product, value, or news item.
+- Voice: direct, confident, specific. A real person wrote this, not a template.
+- Start with "Dear [Company] Team," and end with "Best,\\nAniket Ghosh\\nghosh.anik@northeastern.edu". Output only the letter (Markdown) — flowing prose paragraphs only, with no tables, headings, or bullet lists.""" + FACTS_GUARDRAIL + AUDIENCE_CONTRACT
         user = f"Company: {company}\nRole: {role or '(not specified)'}\n"
         if jd and jd.strip():
             user += f"About the company / job description:\n{jd.strip()}\n"
@@ -312,9 +421,9 @@ RULES:
             {"role": "user", "content": user},
         ]
         out = ""
-        for tok in self.call_llm(messages, max_tokens=700, temperature=0.7):
+        for tok in self.call_llm(messages, max_tokens=1500, temperature=0.7):
             out += tok
-            yield out
+            yield _strip_reasoning(out)
 
     # ── Tab 4: How I can help you ─────────────────────────────────────────
     def how_i_help(self, company, focus):
@@ -324,30 +433,30 @@ RULES:
         company, focus = company.strip(), (focus or "").strip()
         query = f"{company} {focus} hard problems safety interpretability ML engineering impact ownership"
         context = self._full_context(query, top_k=8)
-        system_prompt = """You write a focused, concrete "how I'd add value" pitch in Aniket Ghosh's first-person voice — for a specific company. Source of truth: the provided context.
+        system_prompt = """You write a focused "how I'd add value" pitch in Aniket Ghosh's first-person voice, aimed at one specific company. Source of truth: the provided context.
 
-Emphasize, with evidence (real projects/metrics): complex-problem solving, AI-safety & evaluation rigor, end-to-end ownership, and capacity for hard work (currently runs 3 demanding responsibilities in parallel; wants the hardest problems).
+This is read by someone who has not yet decided Aniket is worth their time. The persuasive move is not listing what he can do — it is showing that he already understands their problem and has done the closest adjacent thing. Specificity about THEIR work is what earns the read.
 
-STRUCTURE (Markdown, tight):
+STRUCTURE (Markdown, tight — the whole thing under 250 words):
 ## 🚀 What I'd bring on day one
-[2–4 bullets: capabilities mapped to what this company does — name specific skills/projects.]
+[Max 3 bullets. Each one is a capability this company specifically needs, backed by a real project and number. Not a skills list.]
 
 ## 🧩 How I'd attack your hardest problem
-[1 short paragraph: take their stated focus/problem and describe concretely how I'd approach it — define the metric, build the pipeline/experiment, validate causally/counterfactually. If safety/evals/interpretability is relevant, connect to my SCD work.]
+[One short paragraph. Take their stated focus and describe concretely how he'd approach it — what he'd measure first, what he'd build, how he'd know it worked. Name the closest thing he has actually done. This is the paragraph that convinces; make it the best one.]
 
 ## 🎯 Why me specifically
-[2–3 bullets: the rare combo — research (interpretability/evals with real results) + production ML (Varosync molecular-similarity pipeline) + clear communication; end-to-end ownership; thrives on the toughest, most ambiguous problems.]
+[Max 2 bullets. The combination that's genuinely rare — published interpretability research plus production ML ownership plus the ability to explain it to non-specialists. Only claim what the context supports.]
 
-RULES: specific over generic; cite real metrics/names; be honest I'm early-career but high-leverage; no filler buzzwords. Confident, not arrogant.""" + STRUCTURED_FORMAT
+RULES: reference the company's actual domain and problem, never a generic version of it. Cite real metrics and names. Be honest that he's early-career but high-leverage — don't inflate. Confident, not arrogant. If a section would only restate another, make it shorter rather than padding it.""" + FACTS_GUARDRAIL + AUDIENCE_CONTRACT + STRUCTURED_FORMAT
         user = f"Company: {company}\nWhat they do / problem they're facing: {focus or '(not specified — infer from the company name and be general but still concrete)'}\n\nMy background:\n{context}\n\nWrite the pitch."
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user},
         ]
         out = ""
-        for tok in self.call_llm(messages, max_tokens=750, temperature=0.7):
+        for tok in self.call_llm(messages, max_tokens=1600, temperature=0.7):
             out += tok
-            yield out
+            yield _strip_reasoning(out)
 
 
 # ── Build ─────────────────────────────────────────────────────────────────
