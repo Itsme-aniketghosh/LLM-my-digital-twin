@@ -1,6 +1,6 @@
 # AI Digital Twin — Knowledge-Grounded Portfolio Assistant
 
-An AI that answers as **Aniket Ghosh**: an AI/ML engineer and researcher (ML engineer at Varosync, M.S. AI at Northeastern) working on AI safety — mechanistic interpretability and evaluations. It replies in the first person, grounded in a personal knowledge base, through a chat interface plus three job-targeted tools.
+An AI that answers as **Aniket Ghosh**: an AI/ML engineer and interpretability researcher (only ML engineer at Varosync, M.S. AI at Northeastern, two interpretability writeups on LessWrong). It replies in the first person, grounded in a personal knowledge base, through a chat interface plus three job-targeted tools.
 
 **Live demo:** [ag-hosh-my-digital-twin.hf.space](https://ag-hosh-my-digital-twin.hf.space/)
 
@@ -14,12 +14,11 @@ Knowledge lives in editable Markdown under [`knowledge/`](knowledge/). At startu
 
 ---
 
-## Features
+## What it does
 
-- **Chat With Me.** Ask about my background, projects, interpretability/safety work, or how I work.
-- **Job Fit Analysis.** Paste a job description and get an honest, specific read on fit, gaps included.
-- **Cover Letter Generator.** Targeted, no-filler cover letters in my voice.
-- **How I Can Help You.** A concrete value pitch for a given company or problem.
+Four tabs. Chat answers questions about my background, projects, and interpretability work. Job Fit takes a pasted job description and gives an honest read on where I stand, gaps included. Cover Letter writes a targeted letter in my voice. How I Help takes a company and its hardest problem and gets specific about where I'd be useful.
+
+All four are told to write for someone who skims: pick the strongest relevant evidence, prove one thing well, and stop. Dumping the whole knowledge base at a reader is the failure mode they're built to avoid.
 
 ---
 

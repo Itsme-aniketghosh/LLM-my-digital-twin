@@ -87,10 +87,31 @@ def _stream_model(provider, model, messages, max_tokens, temperature):
 # on each token, so re-cleaning here means the reader never sees the raw thinking.
 _REASON_TAGS = ("think", "thinking", "reasoning", "analysis")
 
+# Some routed models emit a bare classifier line ("User Safety: safe") as content
+# when a question trips their policy check. Narrow on purpose: the value has to be
+# a single short token, so a real sentence starting with one of these words survives.
+_ARTIFACT_LINE = re.compile(
+    r"^[ \t]*(?:user[ \t]+safety|safety|policy|compliance|analysis|final)[ \t]*:[ \t]*[\w\-]{1,20}[ \t]*$",
+    re.I | re.M,
+)
+
+
+# If any of these show up in the output, the model is echoing its instructions or
+# thinking out loud instead of answering. Whatever follows is unusable, so the whole
+# response gets dropped rather than shown — a visitor must never see the scaffolding.
+_LEAK_MARKERS = (
+    "=== WHO I AM", "FACTUAL GUARDRAILS", "GROUNDING GATE", "OUTPUT PURITY",
+    "WHO YOU ARE WRITING FOR", "SELECTION, NOT COVERAGE", "BANNED phrases",
+    "Context about me:", "My background:", "Answer as me.", "So the user is asking",
+    "the instruction says", "Let me search through the context",
+)
+
 
 def _strip_reasoning(text: str) -> str:
     if not text:
         return text
+    if any(m in text for m in _LEAK_MARKERS):
+        return ""
     # Harmony-style channels: everything before the final-answer marker is reasoning.
     m = re.search(r"<\|channel\|>\s*final\s*<\|message\|>", text)
     if m:
@@ -100,6 +121,7 @@ def _strip_reasoning(text: str) -> str:
         text = re.sub(rf"<{tag}\b[^>]*>.*?</{tag}>", "", text, flags=re.S | re.I)
         text = re.sub(rf"<{tag}\b[^>]*>.*\Z", "", text, flags=re.S | re.I)
     text = re.sub(r"<\|[^|>]*\|>", "", text)  # leftover control tokens
+    text = _ARTIFACT_LINE.sub("", text)       # e.g. a bare "User Safety: safe" line
     return text.lstrip()
 
 
@@ -277,7 +299,28 @@ FACTUAL GUARDRAILS (override anything that conflicts):
 - Availability: Spring 2027 roles starting January 2027, full-time or co-op.
 - Identity is AI/ML engineer and interpretability researcher. Lead with technical work. Personal
   and philanthropic background supplements a professional answer; it never leads one.
-- Invent nothing. If the context does not support a claim, leave the claim out."""
+
+GROUNDING GATE (applies to every answer, no exceptions):
+- Answer only from the provided context. If the context does not cover something, say so in one
+  short line and offer the closest thing it does cover. Do not fill the gap from general
+  knowledge about ML, about the field, or about what someone with this background would likely
+  think, do, or believe.
+- Opinion and belief questions get the same rule. "What do you believe about X", "what's your
+  take on Y", "what do you think of company Z", "what are your AGI timelines", "which lab is
+  doing the best work" — state a view ONLY if the context states it. Otherwise say plainly that
+  it isn't something he's put on record, then redirect to the closest documented position: his
+  safety direction, a published result, or how he works.
+- Never invent employers, dates, numbers, tools, publications, coursework, collaborators, or
+  opinions. A number that is not in the context does not go in the answer.
+- Decline rather than guess on: salary and compensation, visa specifics beyond "F-1, STEM OPT
+  eligible", anything confidential about Varosync's data or clients, opinions about named
+  individuals, and anything about his personal life not written in the context.
+- Saying "that's not something I've written about" is a good answer. Making something up that
+  sounds like him is the worst possible one, because a recruiter may quote it back to him.
+- When you decline, still answer like a person: one or two natural first-person sentences that
+  say what you won't speculate on and what you can talk about instead. Never emit a bare label,
+  status line, verdict, or classification ("Safety: safe", "Refused", "N/A") — that is not an
+  answer, and it looks broken to whoever asked."""
 
 
 # Shared output-formatting contract so every tab renders the same way each run.
@@ -296,22 +339,31 @@ class DigitalTwin:
 
     # ── LLM call with model fallback + streaming ──────────────────────────
     def call_llm(self, messages, max_tokens=700, temperature=0.7):
+        """Stream the cleaned answer-so-far, moving down the chain until one model
+        gives real content. Cleaning happens here rather than in each tab so that a
+        model returning only chain-of-thought, a policy label, or an echo of its own
+        prompt counts as a failure and the next model gets a turn."""
         last_err = None
         for provider, model in MODEL_CHAIN:
-            produced = False
+            raw, clean = "", ""
             try:
                 for delta in _stream_model(provider, model, messages, max_tokens, temperature):
-                    produced = True
-                    yield delta
-                if produced:
+                    raw += delta
+                    clean = _strip_reasoning(raw)
+                    if clean:
+                        yield clean
+                if clean.strip():
                     return
+                print(f"⚠️  {provider}:{model} returned no usable content — trying the next model")
             except Exception as e:
                 last_err = e
                 print(f"⚠️  {provider}:{model} failed: {str(e)[:140]}")
-                if produced:
-                    return  # don't restart a partially-streamed answer
+                if clean.strip():
+                    return  # don't restart an answer that was already streaming cleanly
                 continue
-        yield f"⚠️ All models are busy right now ({type(last_err).__name__ if last_err else 'no output'}). Please try again in a moment."
+        yield ("The models are all busy or unavailable right now"
+               f"{' (' + type(last_err).__name__ + ')' if last_err else ''}. "
+               "Give it a moment and try again.")
 
     def _full_context(self, query: str, top_k: int = 6) -> str:
         retrieved = self.kb.retrieve(query, top_k=top_k)
@@ -339,12 +391,10 @@ SHAPE:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Context about me:\n{context}\n\nQuestion: {message}\n\nAnswer as me. Pick the single most relevant thing and prove it — don't survey everything I've done."},
         ]
-        out = ""
         # Caps are generous because reasoning models in the fallback chain spend part of
         # the budget on hidden thinking; length is controlled by the prompt, not this number.
-        for tok in self.call_llm(messages, max_tokens=1100, temperature=0.75):
-            out += tok
-            yield _strip_reasoning(out)
+        for chunk in self.call_llm(messages, max_tokens=1100, temperature=0.75):
+            yield chunk
 
     # ── Tab 2: Job fit ────────────────────────────────────────────────────
     def analyze_job_fit(self, jd):
@@ -387,10 +437,8 @@ RULES: quote or name the JD's actual requirements rather than generic categories
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Job description:\n{jd}\n\nMy background:\n{context}\n\nAssess my fit against what THIS job actually asks for. Cite my real projects and numbers, name the gaps plainly, and keep every section short."},
         ]
-        out = ""
-        for tok in self.call_llm(messages, max_tokens=1900, temperature=0.6):
-            out += tok
-            yield _strip_reasoning(out)
+        for chunk in self.call_llm(messages, max_tokens=1900, temperature=0.6):
+            yield chunk
 
     # ── Tab 3: Cover letter ───────────────────────────────────────────────
     def cover_letter(self, company, role, jd):
@@ -420,10 +468,8 @@ RULES:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user},
         ]
-        out = ""
-        for tok in self.call_llm(messages, max_tokens=1500, temperature=0.7):
-            out += tok
-            yield _strip_reasoning(out)
+        for chunk in self.call_llm(messages, max_tokens=1500, temperature=0.7):
+            yield chunk
 
     # ── Tab 4: How I can help you ─────────────────────────────────────────
     def how_i_help(self, company, focus):
@@ -453,10 +499,8 @@ RULES: reference the company's actual domain and problem, never a generic versio
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user},
         ]
-        out = ""
-        for tok in self.call_llm(messages, max_tokens=1600, temperature=0.7):
-            out += tok
-            yield _strip_reasoning(out)
+        for chunk in self.call_llm(messages, max_tokens=1600, temperature=0.7):
+            yield chunk
 
 
 # ── Suggested prompts ─────────────────────────────────────────────────────
@@ -472,7 +516,7 @@ CHAT_EXAMPLES = [
     "Explain the SCD result — probing accuracy vs. causal relevance",
     "What's the hardest problem you've solved?",
     "What do you actually do day-to-day at Varosync?",
-    "You train 7–8B models on an 800M-molecule corpus — walk me through that pipeline",
+    "Why did hand-crafted graph features beat TransE embeddings on BioRED?",
     "Have you used interpretability in production, or only in research?",
     "Which interpretability tools do you actually use — nnsight, SAEs, DAS?",
     "Why AI safety? What does 'safety' mean to you technically?",
@@ -605,33 +649,33 @@ button.primary:hover, .twin-cta:hover { filter: brightness(1.07); }
 
 with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as demo:
     gr.Markdown("""
-    # 👤 Aniket Ghosh — Digital Twin
-    **AI/ML Engineer & Researcher** · ML Engineer @ Varosync · M.S. AI @ Northeastern (4.0) · AI Safety — interpretability & evals
+    # Aniket Ghosh — Digital Twin
+    AI/ML engineer and interpretability researcher. Only ML engineer at Varosync, finishing an M.S. in AI at Northeastern, and I publish interpretability work on LessWrong.
 
-    Open to **Research Engineer** and **ML / AI Engineering** roles. Ask me anything, test a job fit, generate a cover letter, or see how I'd help your team.
+    Looking for Spring 2027 roles starting in January. Ask me anything, paste a job description, get a cover letter, or find out how I'd attack your hardest problem.
     """, elem_id="twin-header")
 
     with gr.Tabs():
-        with gr.Tab("💬 Chat With Me"):
-            gr.Markdown("Ask about my background, projects, interpretability/safety work, or how I work.")
+        with gr.Tab("Chat"):
+            gr.Markdown("Ask about my background, my projects, the interpretability work, or how I actually work.")
             gr.ChatInterface(
                 twin.chat,
                 examples=CHAT_EXAMPLES,
                 cache_examples=False,
             )
 
-        with gr.Tab("🎯 Job Fit Analysis"):
-            gr.Markdown("Paste any job description — I'll give an honest, specific read on where I stand, gaps included.")
+        with gr.Tab("Job Fit"):
+            gr.Markdown("Paste a job description. You'll get an honest read on where I stand, gaps included.")
             with gr.Row(elem_classes=["twin-pane"]):
                 with gr.Column():
-                    jf_in = gr.Textbox(label="📋 Job Description", lines=18,
+                    jf_in = gr.Textbox(label="Job description", lines=18,
                                        placeholder="Paste the full job description here…")
-                    jf_btn = gr.Button("🔍 Analyze How I Fit", variant="primary", size="lg", elem_classes=["twin-cta"])
+                    jf_btn = gr.Button("Analyze the fit", variant="primary", size="lg", elem_classes=["twin-cta"])
                 with gr.Column():
-                    jf_out = gr.Markdown(value="*I'll analyze the fit and be honest about strengths and gaps.*", elem_classes=["twin-out"])
+                    jf_out = gr.Markdown(value="*The fit read shows up here. Strengths and gaps both.*", elem_classes=["twin-out"])
             jf_btn.click(twin.analyze_job_fit, inputs=jf_in, outputs=jf_out)
             gr.Examples(
-                label="🧪 Try a sample job description (click to fill & run)",
+                label="Or try one of these",
                 examples=JOBFIT_EXAMPLES,
                 example_labels=JOBFIT_LABELS,
                 inputs=jf_in,
@@ -641,20 +685,20 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
                 cache_examples=False,
             )
 
-        with gr.Tab("✉️ Cover Letter Generator"):
-            gr.Markdown("Get a targeted, no-filler cover letter in my voice. Add the company, role, and a few lines about them (or the JD).")
+        with gr.Tab("Cover Letter"):
+            gr.Markdown("A targeted letter in my voice, no filler. Company and role are enough; a few lines about the team make it sharper.")
             with gr.Row(elem_classes=["twin-pane"]):
                 with gr.Column():
-                    cl_company = gr.Textbox(label="🏢 Company", placeholder="e.g. Anthropic")
-                    cl_role = gr.Textbox(label="💼 Role", placeholder="e.g. Research Engineer, Interpretability")
-                    cl_jd = gr.Textbox(label="📋 About the company / job description (optional)", lines=12,
-                                       placeholder="Paste the JD or a few lines about the team/mission…")
-                    cl_btn = gr.Button("✍️ Generate Cover Letter", variant="primary", size="lg", elem_classes=["twin-cta"])
+                    cl_company = gr.Textbox(label="Company", placeholder="e.g. Anthropic")
+                    cl_role = gr.Textbox(label="Role", placeholder="e.g. Research Engineer, Interpretability")
+                    cl_jd = gr.Textbox(label="About the company, or paste the JD (optional)", lines=12,
+                                       placeholder="A few lines about the team and what they're working on…")
+                    cl_btn = gr.Button("Write the letter", variant="primary", size="lg", elem_classes=["twin-cta"])
                 with gr.Column():
-                    cl_out = gr.Markdown(value="*Your tailored cover letter will appear here.*", elem_classes=["twin-out"])
+                    cl_out = gr.Markdown(value="*The letter shows up here.*", elem_classes=["twin-out"])
             cl_btn.click(twin.cover_letter, inputs=[cl_company, cl_role, cl_jd], outputs=cl_out)
             gr.Examples(
-                label="🧪 Try a sample (click to fill & run)",
+                label="Or try one of these",
                 examples=COVER_EXAMPLES,
                 example_labels=COVER_LABELS,
                 inputs=[cl_company, cl_role, cl_jd],
@@ -664,19 +708,19 @@ with gr.Blocks(title="Aniket Ghosh — Digital Twin", theme=THEME, css=CSS) as d
                 cache_examples=False,
             )
 
-        with gr.Tab("🤝 How I Can Help You"):
-            gr.Markdown("Tell me about your company and your hardest problem — I'll lay out concretely how I'd add value.")
+        with gr.Tab("How I Help"):
+            gr.Markdown("Tell me what your team does and what's hard about it. I'll be specific about where I'd help.")
             with gr.Row(elem_classes=["twin-pane"]):
                 with gr.Column():
-                    h_company = gr.Textbox(label="🏢 Company", placeholder="e.g. a frontier-model safety team")
-                    h_focus = gr.Textbox(label="🧩 What you do / your hardest problem", lines=12,
+                    h_company = gr.Textbox(label="Company or team", placeholder="e.g. a frontier-model safety team")
+                    h_focus = gr.Textbox(label="What you do, and what's hard about it", lines=12,
                                          placeholder="e.g. We need reliable evals for deceptive behavior in agents…")
-                    h_btn = gr.Button("🚀 Show How I'd Help", variant="primary", size="lg", elem_classes=["twin-cta"])
+                    h_btn = gr.Button("Show me", variant="primary", size="lg", elem_classes=["twin-cta"])
                 with gr.Column():
-                    h_out = gr.Markdown(value="*A concrete value pitch will appear here.*", elem_classes=["twin-out"])
+                    h_out = gr.Markdown(value="*The pitch shows up here.*", elem_classes=["twin-out"])
             h_btn.click(twin.how_i_help, inputs=[h_company, h_focus], outputs=h_out)
             gr.Examples(
-                label="🧪 Try a sample (click to fill & run)",
+                label="Or try one of these",
                 examples=HELP_EXAMPLES,
                 example_labels=HELP_LABELS,
                 inputs=[h_company, h_focus],

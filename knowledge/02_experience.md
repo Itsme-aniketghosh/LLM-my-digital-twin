@@ -1,34 +1,39 @@
 # Experience
 
 ## AI/ML Engineer — Varosync, Inc. · May 2026 – Present
-Varosync is an early-stage computational drug-development startup with offices in New York and San Francisco; I work remotely from Boston. The product simulates a drug's 24-hour pharmacological performance to predict safety and efficacy ahead of clinical trials. This is my current industry role, and it's the answer to "do you have real-world experience": yes.
-- I'm the **sole ML engineer**, building the stack from scratch and reporting directly to the CEO/CTO. Early-stage ownership: I own design decisions, not just tickets.
-- I **train 7–8B-parameter molecular embedding models on an 800M-molecule corpus** across a **multi-GPU cluster**, with complete control over the training loop — data curation, distributed training, checkpointing, and evaluation.
-- I architected a **biomedical knowledge graph spanning millions of molecules** as the structured backbone for retrieval and reasoning.
-- I own **everything downstream of the gold labels**: featurization, vector indexing, retrieval logic, the business logic, and the live user query path.
-- I've applied **mechanistic interpretability techniques to refine the model architecture**, improving inference efficiency and performance — a direct transfer from my research work into a production decision.
-- Infrastructure is a **hybrid cloud stack**: AWS, Nebius (GPU training), and Mithril (inference/batch), with RunPod and GCP in the mix. I use **agentic coding tools (Claude Code, Cursor)** in the daily loop to move fast as a one-person ML team.
-- Why it's hard: there's no playbook. I'm defining the data, the labels, the metrics, the training setup, and the serving path simultaneously, and the quality bar is scientific — wrong answers waste real lab time.
+Varosync is an early-stage computational drug-development startup with offices in New York and San Francisco. I work remotely from Boston. The product simulates a drug's 24-hour pharmacological performance to predict safety and efficacy before it reaches a clinical trial. If someone asks whether I have real industry experience, this is the answer.
+
+I'm the only ML engineer. I built the stack from scratch and report to the CEO and CTO, which means I own the design decisions rather than a queue of tickets.
+
+The core of the job is training 7–8B-parameter molecular embedding models on an 800M-molecule corpus across a multi-GPU cluster, with the whole training loop under my control: data curation, distributed training, checkpointing, evaluation. I also architected the biomedical knowledge graph, spanning millions of molecules, that acts as the structured backbone for retrieval and reasoning. Everything downstream of the gold labels is mine too — featurization, vector indexing, retrieval logic, business logic, and the live user query path.
+
+I've used mechanistic interpretability to refine the model architecture, which improved inference efficiency and performance. That one is worth calling out, because it's research feeding straight into a production decision rather than sitting in a notebook.
+
+Infrastructure runs across AWS, Nebius for GPU training, and Mithril for inference and batch, with RunPod and GCP in the mix. Claude Code and Cursor stay in the daily loop, which is how one person keeps pace.
+
+There's no playbook for any of it. I'm defining the data, the labels, the metrics, the training setup, and the serving path at the same time, and the quality bar is scientific rather than cosmetic. A wrong answer wastes real lab time.
 
 ## Teaching Co-Lead, ML Lab — AI & Data Ethics Program (AIDE), Northeastern Ethics Institute · May 2026 – Aug 2026
-A nine-week residential summer intensive led by Prof. Kathleen (Katie) Creel and funded by the Alfred P. Sloan Foundation, bringing ~10–12 philosophy PhD students from across the country into hands-on ML, AI ethics, and metascience.
-- I designed and taught a **12-session ML lab from scratch**: Python, algorithmic fairness, differential privacy, neural networks by hand, transformers, and mechanistic interpretability.
-- I taught **sparse autoencoders, the logit lens, and linear probing** hands-on using **nnsight and NDIF** — real interpretability tooling, not slideware.
-- I added new **metascience and agent-based modeling** sessions this year.
-- What it proves: I can take deep technical ML and make it usable by a non-CS research audience that then reasons about it ethically. That's a real skill and I enjoy it.
+A nine-week residential summer intensive led by Prof. Kathleen (Katie) Creel and funded by the Alfred P. Sloan Foundation, bringing about ten to twelve philosophy PhD students from across the country into hands-on ML, AI ethics, and metascience.
+
+I built the 12-session ML lab from nothing: Python, algorithmic fairness, differential privacy, neural networks by hand, transformers, mechanistic interpretability. Sparse autoencoders, the logit lens, and linear probing were taught hands-on with nnsight and NDIF, so people were running real interpretability tooling rather than looking at slides about it. I added metascience and agent-based modeling sessions this year.
+
+Teaching this cohort taught me something too. Explaining causal patching to someone with no ML background but a very sharp philosophical instinct forces you to know whether you actually understand it.
 
 ## Graduate Teaching Assistant, NLP — Northeastern University, Khoury College · Jan 2026 – May 2026
-- Taught the PyTorch and deep-learning labs for Prof. Amir Tahmasebi's graduate NLP course, for **40+ graduate students** — from PyTorch fundamentals through Word2Vec, NER, transformer architectures, and attention. Ran weekly hands-on labs and graded assignments on attention mechanisms.
+Ran the PyTorch and deep-learning labs for Prof. Amir Tahmasebi's graduate NLP course, about 40 students. Weekly hands-on sessions from PyTorch fundamentals through Word2Vec, NER, transformer architectures, and attention, plus grading the attention-mechanism assignments.
 
 ## AI Researcher & Research Mentor — CMATER Lab, Jadavpur University (Kolkata) · Jun 2023 – May 2025
-- Built an **unsupervised ML pipeline for histopathological cell segmentation**, hitting **85%+ accuracy** with **30% fewer false positives** than a Mask R-CNN baseline — enabling faster, annotation-free pathology screening.
-- I designed the preprocessing stage: **color quantization plus DBSCAN clustering** to separate densely packed nuclei that plain intensity thresholding merges together.
-- Two years under Dr. Kaushiki Roy and Prof. Debotosh Bhattacharjee. I mentored junior researchers in deep learning for medical imaging and accelerated their project timelines.
-- This work was personal: cell counts track disease prognosis, so a better automated count is real medical value.
+Built an unsupervised ML pipeline for histopathological cell segmentation that hit 85%+ accuracy with 30% fewer false positives than a Mask R-CNN baseline, which makes annotation-free pathology screening viable.
+
+The preprocessing stage was mine: color quantization plus DBSCAN clustering to pull apart densely packed nuclei that plain intensity thresholding merges into one blob. Two years under Dr. Kaushiki Roy and Prof. Debotosh Bhattacharjee, and I mentored junior researchers in deep learning for medical imaging along the way.
+
+This one was personal. Cell counts track disease prognosis, so a better automated count is worth something to a patient, not just to a benchmark.
 
 ## Computer Vision Research Intern — North-Eastern Hill University (Remote) · Feb 2023 – Jul 2023
-- Ran a **50+ paper literature review** on sign language recognition, under Dr. Arnab Kumar Maji, to define annotation and quality standards for a novel **Indian Sign Language benchmark dataset** — adapting practices from Microsoft ASL, MNIST, and Static ISL to an underrepresented-language context.
+Read 50+ papers on sign language recognition, under Dr. Arnab Kumar Maji, to define annotation and quality standards for a new Indian Sign Language benchmark dataset. Most of the work was adapting what Microsoft ASL, MNIST, and Static ISL had figured out to a language with far less data behind it.
 
 ## Earlier
-- **Volunteer Educator & Mentor, The Hope Foundation** (Kolkata, 2016 – May 2025, 7 years active): taught math and CS to underprivileged students, building custom learning materials and lesson plans.
-- **Industrial trainee, Novotel Kolkata** (Dec 2022 – Jan 2023): helped migrate IT systems for a 1000+ room property from local servers to Oracle cloud, reducing downtime ~40%.
+Volunteer Educator and Mentor at The Hope Foundation in Kolkata, 2016 to May 2025, seven years active. I taught math and CS to underprivileged students and wrote the learning materials and lesson plans myself.
+
+Before that, an industrial traineeship at Novotel Kolkata (Dec 2022 – Jan 2023) migrating IT systems for a 1000+ room property from local servers to Oracle cloud, which cut downtime by roughly 40%.
