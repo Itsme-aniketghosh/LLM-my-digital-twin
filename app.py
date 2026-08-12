@@ -509,25 +509,17 @@ RULES: reference the company's actual domain and problem, never a generic versio
 # The three keyed lists pair with *_LABELS — Gradio renders labelled examples as
 # readable chips instead of squeezing full text into a cramped multi-column table.
 
+# Six, not sixteen: these sit above the chat box, and a wall of chips buries it.
+# Chosen to span the range rather than to be exhaustive — intro, flagship research,
+# depth, the day job, motivation, logistics. Everything else the twin answers fine
+# when asked; it just doesn't need to be advertised.
 CHAT_EXAMPLES = [
     "Tell me about yourself and what you're working on",
     "Walk me through your LessWrong post on repairing a misaligned fine-tune",
-    "How do linear probes tell you where quantization will hurt?",
-    "Explain the SCD result — probing accuracy vs. causal relevance",
     "What's the hardest problem you've solved?",
     "What do you actually do day-to-day at Varosync?",
-    "Why did hand-crafted graph features beat TransE embeddings on BioRED?",
-    "Have you used interpretability in production, or only in research?",
-    "Which interpretability tools do you actually use — nnsight, SAEs, DAS?",
     "Why AI safety? What does 'safety' mean to you technically?",
-    "What did you teach philosophy PhD students about interpretability?",
-    "Tell me about the grokking / Fourier-circuits reproduction",
-    "Why should we hire you over other new grads?",
-    "Where are you weakest, and what would you need to learn?",
     "What kind of role are you looking for, and when can you start?",
-    "How do you handle running three demanding things at once?",
-    "What's your experience auditing models for bias?",
-    "What do you want to work on next?",
 ]
 
 JOBFIT_LABELS = [
